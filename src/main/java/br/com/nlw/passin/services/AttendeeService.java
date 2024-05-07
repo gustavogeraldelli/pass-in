@@ -1,13 +1,17 @@
 package br.com.nlw.passin.services;
 
 import br.com.nlw.passin.domain.attendee.Attendee;
+import br.com.nlw.passin.domain.attendee.exceptions.AttendeeAlreadyExistsException;
+import br.com.nlw.passin.domain.attendee.exceptions.AttendeeNotFoundException;
 import br.com.nlw.passin.domain.checkin.CheckIn;
 import br.com.nlw.passin.dtos.attendee.AttendeeDTO;
 import br.com.nlw.passin.dtos.attendee.AttendeeListResponseDTO;
+import br.com.nlw.passin.dtos.attendee.AttendeeBadgeResponseDTO;
 import br.com.nlw.passin.repositories.AttendeeRepository;
 import br.com.nlw.passin.repositories.CheckInRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,11 +21,11 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class AttendeeService {
 
-    private final AttendeeRepository repository;
+    private final AttendeeRepository attendeeRepository;
     private final CheckInRepository checkInRepository;
 
     public List<Attendee> getAllAttendeesFromEvent(String eventId) {
-        return repository.findByEventId(eventId);
+        return attendeeRepository.findByEventId(eventId);
     }
 
     public AttendeeListResponseDTO getEventsAttendee(String eventId) {
@@ -37,5 +41,25 @@ public class AttendeeService {
 
         }).toList();
         return new AttendeeListResponseDTO(attendees);
+    }
+
+    public void verifyAttendeeSubscription(String email, String eventId) {
+        Optional<Attendee> attendee = attendeeRepository.findByEventIdAndEmail(eventId, email);
+        if (attendee.isPresent())
+            throw new AttendeeAlreadyExistsException("Attendee is already subscribed");
+    }
+
+    public Attendee registerAttendee(Attendee attendee) {
+        attendeeRepository.save(attendee);
+        return attendee;
+    }
+
+    public AttendeeBadgeResponseDTO getAttendeeBadge(String attendeeId, UriComponentsBuilder uriComponentsBuilder) {
+        Attendee attendee = attendeeRepository.findById(attendeeId).orElseThrow(() -> new AttendeeNotFoundException("Attendee with id " + attendeeId + " was not found"));
+        var uri = uriComponentsBuilder.path("/attendees/{attendeeId}/check-in").buildAndExpand(attendeeId).toUri().toString();
+        return new AttendeeBadgeResponseDTO(attendee.getName(),
+                attendee.getEmail(),
+                uri,
+                attendee.getEvent().getId());
     }
 }

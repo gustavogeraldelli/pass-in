@@ -29,7 +29,7 @@ SET FILES NIO TRUE
 SET FILES NIO SIZE 256
 SET FILES LOG TRUE
 SET FILES LOG SIZE 50
-SET FILES CHECK 1054
+SET FILES CHECK 2844
 SET DATABASE COLLATION "SQL_TEXT" PAD SPACE
 CREATE USER SA PASSWORD DIGEST 'd41d8cd98f00b204e9800998ecf8427e'
 ALTER USER SA SET LOCAL TRUE
@@ -58,4 +58,7 @@ INSERT INTO "flyway_schema_history" VALUES(1,'1','create-table-events','SQL','V1
 INSERT INTO "flyway_schema_history" VALUES(2,'2','create-table-attendees','SQL','V2__create-table-attendees.sql',1911608110,'SA','2024-05-05 20:59:32.143718',1,'1')
 INSERT INTO "flyway_schema_history" VALUES(3,'3','create-table-checkins','SQL','V3__create-table-checkins.sql',-432511616,'SA','2024-05-05 20:59:32.150716',0,'1')
 INSERT INTO "flyway_schema_history" VALUES(4,'4','create-indexes','SQL','V4__create-indexes.sql',-975704723,'SA','2024-05-05 20:59:32.155718',0,'1')
+INSERT INTO EVENTS VALUES('732044ae-bae4-4901-937c-55561cb53507','umz','apenas 1','umz',1)
 INSERT INTO EVENTS VALUES('d550ff30-5d0c-40dd-8ab6-1398cb795dad','Rocketseat NLW','.,.,','rocketseat-nlw',20)
+INSERT INTO ATTENDEES VALUES('29a8d14d-e273-4dbb-ab3d-10373094c3cf','fernanda kiper','emal','d550ff30-5d0c-40dd-8ab6-1398cb795dad','2024-05-07 15:48:07.977696')
+INSERT INTO ATTENDEES VALUES('bd0178ab-bc08-4d36-bc74-c8c83755abca','primeiro','primeiro','732044ae-bae4-4901-937c-55561cb53507','2024-05-07 15:59:01.593614')

@@ -1,6 +1,7 @@
 package br.com.nlw.passin.controllers;
 
 import br.com.nlw.passin.dtos.attendee.AttendeeListResponseDTO;
+import br.com.nlw.passin.dtos.attendee.AttendeeRequestDTO;
 import br.com.nlw.passin.dtos.event.EventRequestDTO;
 import br.com.nlw.passin.dtos.event.EventResponseDTO;
 import br.com.nlw.passin.services.AttendeeService;
@@ -35,5 +36,12 @@ public class EventController {
     public ResponseEntity<AttendeeListResponseDTO> getEventAttendees(@PathVariable String eventId) {
         AttendeeListResponseDTO attendees = attendeeService.getEventsAttendee(eventId);
         return ResponseEntity.ok(attendees);
+    }
+
+    @PostMapping("/{eventId}/attendees")
+    public ResponseEntity<String> registerAttendee(@PathVariable String eventId, @RequestBody AttendeeRequestDTO attendee, UriComponentsBuilder uriComponentsBuilder) {
+        String attendeeId = eventService.registerAttendeeOnEvent(eventId, attendee);
+        var uri = uriComponentsBuilder.path("/attendees/{attendeeId}/badge").buildAndExpand(attendeeId).toUri();
+        return ResponseEntity.created(uri).body(attendeeId);
     }
 }
