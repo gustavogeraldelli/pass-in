@@ -1,6 +1,46 @@
 import { Search, MoreHorizontal, ChevronsLeft, ChevronLeft, ChevronRight, ChevronsRight } from 'lucide-react'
+import { IconButton } from './icon-button'
+import { Table } from './table/table'
+import { TableHeader } from './table/table-header'
+import { TableCell } from './table/table-cell'
+import { TableRow } from './table/table-row'
+import { useState } from 'react'
+import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
+
+dayjs.extend(relativeTime)
 
 export function AttendeeList() {
+    let attendees = Array.from({length: 50}).map(() => {
+        return {
+            id: 123123,
+            name: 'Foo Bar',
+            email: 'email@test.com',
+            createdAt: Date.parse("2024-05-20"),
+            checkedInAt: new Date()
+        }
+    })
+
+    const [page, setPage] = useState(1)
+
+    const totalPages = Math.ceil(attendees.length / 10);
+
+    function goToNextPage() {
+        setPage(page + 1)
+    }
+
+    function goToPreviousPage() {
+        setPage(page - 1)
+    }
+
+    function goToFirstPage() {
+        setPage(1)
+    }
+
+    function goToLastPage() {
+        setPage(totalPages)
+    }
+
     return (
         <div className='flex flex-col gap-4'>
             <div className="flex gap-3 items-center">
@@ -11,72 +51,70 @@ export function AttendeeList() {
                 </div>
             </div>
 
-            <div className="border border-white/10 rounded-lg">
-                <table className="w-full">
-                    <thead>
-                        <tr className='border-b border-white/10'>
-                            <th style={{width: 48}} className='py-3 px-4 text-sm font-semibold text-left'>
-                                <input className='size-4 bg-black/20 rounded border border-white/10 ' type="checkbox" name="" id="" />
-                            </th>
-                            <th className='py-3 px-4 text-sm font-semibold text-left'>Código</th>
-                            <th className='py-3 px-4 text-sm font-semibold text-left'>Participante</th>
-                            <th className='py-3 px-4 text-sm font-semibold text-left'>Data de inscrição</th>
-                            <th className='py-3 px-4 text-sm font-semibold text-left'>Data do check-in</th>
-                            <th style={{width: 64}} className='py-3 px-4 text-sm font-semibold text-left'></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {Array.from({ length: 6 }).map((_, i) => {
-                            return (
-                                <tr key={i} className='border-b border-white/10 hover:bg-white/5'>
-                                    <td className='py-3 px-4 text-sm text-zinc-300'>
-                                        <input className='size-4 bg-black/20 rounded border border-white/10 ' type="checkbox" name="" id="" />
-                                    </td>
-                                    <td className='py-3 px-4 text-sm text-zinc-300'>123123</td>
-                                    <td className='py-3 px-4 text-sm text-zinc-300'>
-                                        <div className='flex flex-col gap-1'>
-                                            <span className='font-semibold text-white'>Foo Bar</span>
-                                            <span>email@test.com</span>
-                                        </div>
-                                    </td>
-                                    <td className='py-3 px-4 text-sm text-zinc-300'>2 dias atrás</td>
-                                    <td className='py-3 px-4 text-sm text-zinc-300'>1 dia atrás</td>
-                                    <td className='py-3 px-4 text-sm text-zinc-300'>
-                                        <button className='bg-black/20 botder border-white/210 rounded-md p-1.5'>
-                                            <MoreHorizontal className="size-4" />
-                                        </button>
-                                    </td>
-                                </tr>
-                            )
-                        })}
-                    </tbody>
-                    <tfoot>
-                        <td className='py-3 px-4 text-sm text-zinc-300' colSpan={3}>
-                            Mostrando 1 de 2
-                        </td>
-                        <td className='py-3 px-4 text-sm text-zinc-300 text-right' colSpan={3}>
-                            <div className='inline-flex items-center gap-8'>
-                                <span>Página 1 de 2</span>
-                                
-                                <div className='flex gap-1.5'>
-                                    <button className='bg-black/20 botder border-white/210 rounded-md p-1.5'>
-                                        <ChevronsLeft className="size-4" />
-                                    </button>
-                                    <button className='bg-black/20 botder border-white/210 rounded-md p-1.5'>
-                                        <ChevronLeft className="size-4" />
-                                    </button>
-                                    <button className='bg-black/20 botder border-white/210 rounded-md p-1.5'>
-                                        <ChevronRight className="size-4" />
-                                    </button>
-                                    <button className='bg-black/20 botder border-white/210 rounded-md p-1.5'>
-                                        <ChevronsRight className="size-4" />
-                                    </button>
-                                </div>
+            <Table>
+                <thead>
+                    <tr className='border-b border-white/10'>
+                        <TableHeader style={{width: 48}}>
+                            <input className='size-4 bg-black/20 rounded border border-white/10 ' type="checkbox" name="" id="" />
+                        </TableHeader>
+                        <TableHeader>Código</TableHeader>
+                        <TableHeader>Participante</TableHeader>
+                        <TableHeader>Data de inscrição</TableHeader>
+                        <TableHeader>Data do check-in</TableHeader>
+                        <TableHeader style={{width: 64}}></TableHeader>
+                    </tr>
+                </thead>
+                <tbody>
+                    {attendees.slice((page - 1) * 10, page * 10).map((attendee) => {
+                        return (
+                            <TableRow key={attendee.id}>
+                                <TableCell>
+                                    <input className='size-4 bg-black/20 rounded border border-white/10 ' type="checkbox" name="" id="" />
+                                </TableCell>
+                                <TableCell>{attendee.id}</TableCell>
+                                <TableCell>
+                                    <div className='flex flex-col gap-1'>
+                                        <span className='font-semibold text-white'>{attendee.name}</span>
+                                        <span>{attendee.email}</span>
+                                    </div>
+                                </TableCell>
+                                <TableCell>{dayjs().to(attendee.createdAt)}</TableCell>
+                                <TableCell>{dayjs().to(attendee.checkedInAt)}</TableCell>
+                                <TableCell>
+                                    <IconButton transparent>
+                                        <MoreHorizontal className="size-4" />
+                                    </IconButton>
+                                </TableCell>
+                            </TableRow>
+                        )
+                    })}
+                </tbody>
+                <tfoot>
+                    <TableCell colSpan={3}>
+                        Mostrando 10 de {attendees.length}
+                    </TableCell>
+                    <TableCell className='text-right' colSpan={3}>
+                        <div className='inline-flex items-center gap-8'>
+                            <span>Página {page} de {totalPages}</span>
+                            
+                            <div className='flex gap-1.5'>
+                                <IconButton onClick={goToFirstPage} disabled={page === 1}>
+                                    <ChevronsLeft className="size-4" />
+                                </IconButton>
+                                <IconButton onClick={goToPreviousPage} disabled={page === 1}>
+                                    <ChevronLeft className="size-4" />
+                                </IconButton>
+                                <IconButton onClick={goToNextPage} disabled={page === totalPages}>
+                                    <ChevronRight className="size-4" />
+                                </IconButton>
+                                <IconButton onClick={goToLastPage} disabled={page === totalPages}>
+                                    <ChevronsRight className="size-4" />
+                                </IconButton>
                             </div>
-                        </td>
-                    </tfoot>
-                </table>
-            </div>
+                        </div>
+                    </TableCell>
+                </tfoot>
+            </Table>
         </div>
     )
 }
