@@ -32,7 +32,7 @@ public class EventController {
         return ResponseEntity.created(uri).body(id);
     }
 
-    @GetMapping("/attendees/{eventId}")
+    @GetMapping("/{eventId}/attendees")
     public ResponseEntity<AttendeeListResponseDTO> getEventAttendees(@PathVariable String eventId) {
         AttendeeListResponseDTO attendees = attendeeService.getEventsAttendee(eventId);
         return ResponseEntity.ok(attendees);
