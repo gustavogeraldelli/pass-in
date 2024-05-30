@@ -11,6 +11,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 @RestController
 @RequestMapping("/attendees")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:9090")
 public class AttendeeController {
 
     private final AttendeeService service;
