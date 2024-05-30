@@ -4,41 +4,63 @@ import { Table } from './table/table'
 import { TableHeader } from './table/table-header'
 import { TableCell } from './table/table-cell'
 import { TableRow } from './table/table-row'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 
 dayjs.extend(relativeTime)
 
+interface Attendee {
+    id: string,
+    name: string,
+    email: string,
+    createdAt: string,  
+    checkInAt: string | null
+}
+
 export function AttendeeList() {
-    let attendees = Array.from({length: 50}).map(() => {
-        return {
-            id: 123123,
-            name: 'Foo Bar',
-            email: 'email@test.com',
-            createdAt: Date.parse("2024-05-20"),
-            checkedInAt: new Date()
-        }
+    const [page, setPage] = useState(() => {
+        const url = new URL(window.location.toString())
+        if (url.searchParams.has('page'))
+            return Number(url.searchParams.get('page'))
+        return 1
     })
-
-    const [page, setPage] = useState(1)
-
+    const [attendees, setAttendees] = useState<Attendee[]>([])
     const totalPages = Math.ceil(attendees.length / 10);
 
+    useEffect(() => {
+        const url = new URL('http://localhost:8080/events/ae0246f4-77a3-4d64-a949-3b95b7ed1e32/attendees')
+
+        // url.searchParams.set('query', '')
+
+        fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            setAttendees(data.attendees)
+        })
+    }, [page])
+
+    function setCurrentPage(page: number) {
+        const url = new URL(window.location.toString())
+        url.searchParams.set('page', String(page))
+        window.history.pushState({}, '', url)
+        setPage(page)
+    }
+
     function goToNextPage() {
-        setPage(page + 1)
+        setCurrentPage(page + 1)
     }
 
     function goToPreviousPage() {
-        setPage(page - 1)
+        setCurrentPage(page - 1)
     }
 
     function goToFirstPage() {
-        setPage(1)
+        setCurrentPage(1)
     }
 
     function goToLastPage() {
-        setPage(totalPages)
+        setCurrentPage(totalPages)
     }
 
     return (
@@ -47,7 +69,7 @@ export function AttendeeList() {
                 <h1 className="text-2xl font-bold">Participantes</h1>
                 <div className="w-72 px-3 py-1.5 border border-white/10 rounded-lg flex items-center gap-3">
                     <Search className="size-4 text-emerald-300" />
-                    <input className="bg-transparent flex-1 outline-none h-auto border-0 p-0 text-sm" placeholder="Buscar participante..." />
+                    <input className="bg-transparent flex-1 outline-none h-auto border-0 p-0 text-sm focus:ring-0" placeholder="Buscar participante..." />
                 </div>
             </div>
 
@@ -79,7 +101,7 @@ export function AttendeeList() {
                                     </div>
                                 </TableCell>
                                 <TableCell>{dayjs().to(attendee.createdAt)}</TableCell>
-                                <TableCell>{dayjs().to(attendee.checkedInAt)}</TableCell>
+                                <TableCell>{attendee.checkInAt === null ? '' : dayjs().to(attendee.checkInAt)}</TableCell>
                                 <TableCell>
                                     <IconButton transparent>
                                         <MoreHorizontal className="size-4" />
@@ -91,7 +113,7 @@ export function AttendeeList() {
                 </tbody>
                 <tfoot>
                     <TableCell colSpan={3}>
-                        Mostrando 10 de {attendees.length}
+                        Mostrando {page * 10 < attendees.length ? 10 : page*10 - attendees.length} de {attendees.length}
                     </TableCell>
                     <TableCell className='text-right' colSpan={3}>
                         <div className='inline-flex items-center gap-8'>
