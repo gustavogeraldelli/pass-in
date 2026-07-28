@@ -1,8 +1,6 @@
 import { ComponentProps } from "react";
 
-interface TableProps extends ComponentProps<'table'> {
-
-}
+type TableProps = ComponentProps<'table'>
 
 export function Table(props: TableProps) {
     return (

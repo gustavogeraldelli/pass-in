@@ -1,35 +1,86 @@
 # pass.in
-pass.in is an application for managing participants in in-person events.
 
-Project originated at the rocketseat event, [nlw](https://www.rocketseat.com.br/eventos/nlw).
+pass.in is a fullstack event check-in platform for managing in-person events, attendee registrations, badges, and check-ins.
+
+The project was originally based on Rocketseat's NLW event and is being evolved with a custom fullstack roadmap focused on production-style backend contracts, a real React frontend flow, PostgreSQL persistence, Docker setup, OpenAPI documentation, and relevant tests.
+
+## Stack
+
+- Java 21
+- Spring Boot 4.1
+- Spring Web
+- Spring Data JPA
+- Flyway
+- HSQLDB currently, with PostgreSQL planned
+- React 19
+- TypeScript
+- Vite 8
+- Tailwind CSS 4
+
+## Current Features
+
+- Register events
+- View event details
+- Register attendees for an event
+- List event attendees
+- Generate attendee badges
+- Check attendees in
+- Prevent duplicate attendee registration in the same event
+- Prevent registration when an event is full
+- Prevent duplicate check-ins
+
+## Planned Improvements
+
+- Replace HSQLDB with PostgreSQL and Docker Compose
+- Add backend DTO validation and standardized API errors
+- Add OpenAPI/Swagger documentation
+- Add event listing, attendee search, and backend pagination
+- Replace hardcoded frontend event data with routes and API state
+- Add registration, badge, and QR code check-in screens in the frontend
+- Add backend tests for event registration and check-in rules
+- Add CI and final Docker setup
 
 ## Backend
-- REST API developed with Spring and SQLite database
 
-Spring dependencies used:
-1. Spring Boot
-2. Spring Web
-3. Spring Data JPA
-4. Flyway Migration
-5. Lombok
+The backend is a Spring Boot REST API located in `backend`.
 
-### Features
-- [x] Register a new event;
-- [x] View event data;
-- [x] View the list of participants; 
-- [x] The participant must be able to register for an event;
-- [x] The participant must be able to view their registration badge;
-- [x] The participant must be able to check-in at the event;
-- [x] The participant can only register for an event once;
-- [x] Participants can only register for events with available places;
-- [x] The participant can only check-in to an event once;
+Run tests:
 
+```bash
+cd backend
+./mvnw test
+```
 
-### Endpoints
-[Docs](https://nlw-unite-nodejs.onrender.com/docs/static/index.html#/)
+Run locally:
+
+```bash
+cd backend
+./mvnw spring-boot:run
+```
 
 ## Frontend
-- Built with React and Tailwind CSS
 
-### Interface
+The frontend is a React application located in `frontend`.
+
+Install dependencies:
+
+```bash
+cd frontend
+npm install
+```
+
+Run locally:
+
+```bash
+npm run dev
+```
+
+Build:
+
+```bash
+npm run build
+```
+
+## Interface
+
 ![interface](assets/ui.png)
