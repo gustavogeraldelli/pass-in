@@ -9,6 +9,8 @@ import dev.gustavo.passin.dtos.attendee.AttendeeListResponseDTO;
 import dev.gustavo.passin.dtos.attendee.AttendeeBadgeResponseDTO;
 import dev.gustavo.passin.repositories.AttendeeRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -27,19 +29,21 @@ public class AttendeeService {
         return attendeeRepository.findByEventId(eventId);
     }
 
-    public AttendeeListResponseDTO getEventsAttendee(String eventId) {
-        List<Attendee> attendeeList = getAllAttendeesFromEvent(eventId);
-        List<AttendeeDTO> attendees = attendeeList.stream().map(attendee -> {
-            Optional<CheckIn> checkIn = checkInService.getCheckIn(attendee.getId());
-            LocalDateTime checkedInAt = checkIn.isPresent() ? checkIn.get().getCreatedAt() : null;
-            return new AttendeeDTO(attendee.getId(),
-                    attendee.getName(),
-                    attendee.getEmail(),
-                    attendee.getCreatedAt(),
-                    checkedInAt);
+    public Integer countAttendeesFromEvent(String eventId) {
+        return attendeeRepository.countByEventId(eventId);
+    }
 
-        }).toList();
-        return new AttendeeListResponseDTO(attendees);
+    public AttendeeListResponseDTO getEventsAttendee(String eventId, String query, Pageable pageable) {
+        String normalizedQuery = query == null || query.isBlank() ? null : query.trim();
+        Page<Attendee> attendeePage = attendeeRepository.findByEventIdAndQuery(eventId, normalizedQuery, pageable);
+        List<AttendeeDTO> attendees = attendeePage.stream().map(this::toDTO).toList();
+
+        return new AttendeeListResponseDTO(
+                attendees,
+                attendeePage.getNumber(),
+                attendeePage.getSize(),
+                attendeePage.getTotalElements(),
+                attendeePage.getTotalPages());
     }
 
     public void verifyAttendeeSubscription(String email, String eventId) {
@@ -69,5 +73,17 @@ public class AttendeeService {
 
     private Attendee getAttendee(String attendeeId) {
         return attendeeRepository.findById(attendeeId).orElseThrow(() -> new AttendeeNotFoundException("Attendee with id " + attendeeId + " was not found"));
+    }
+
+    private AttendeeDTO toDTO(Attendee attendee) {
+        Optional<CheckIn> checkIn = checkInService.getCheckIn(attendee.getId());
+        LocalDateTime checkedInAt = checkIn.map(CheckIn::getCreatedAt).orElse(null);
+
+        return new AttendeeDTO(
+                attendee.getId(),
+                attendee.getName(),
+                attendee.getEmail(),
+                attendee.getCreatedAt(),
+                checkedInAt);
     }
 }

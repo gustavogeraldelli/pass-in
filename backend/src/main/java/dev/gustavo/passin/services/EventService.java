@@ -5,6 +5,8 @@ import dev.gustavo.passin.domain.event.Event;
 import dev.gustavo.passin.domain.event.exceptions.EventIsFullException;
 import dev.gustavo.passin.domain.event.exceptions.EventNotFoundException;
 import dev.gustavo.passin.dtos.attendee.AttendeeRequestDTO;
+import dev.gustavo.passin.dtos.event.EventDTO;
+import dev.gustavo.passin.dtos.event.EventListResponseDTO;
 import dev.gustavo.passin.dtos.event.EventRequestDTO;
 import dev.gustavo.passin.dtos.event.EventResponseDTO;
 import dev.gustavo.passin.repositories.EventRepository;
@@ -22,10 +24,25 @@ public class EventService {
     private final EventRepository eventRepository;
     private final AttendeeService attendeeService;
 
+    public EventListResponseDTO getEvents() {
+        List<EventDTO> events = eventRepository.findAll()
+                .stream()
+                .map(event -> new EventDTO(
+                        event.getId(),
+                        event.getTitle(),
+                        event.getDetails(),
+                        event.getSlug(),
+                        event.getMaximumAttendees(),
+                        attendeeService.countAttendeesFromEvent(event.getId())))
+                .toList();
+
+        return new EventListResponseDTO(events);
+    }
+
     public EventResponseDTO getEvent(String eventId) {
         Event event = getEventById(eventId);
-        List<Attendee> attendeeList = attendeeService.getAllAttendeesFromEvent(eventId);
-        return new EventResponseDTO(event, attendeeList.size());
+        Integer attendeeCount = attendeeService.countAttendeesFromEvent(eventId);
+        return new EventResponseDTO(event, attendeeCount);
     }
 
     public String createEvent(EventRequestDTO eventRequestDTO) {
@@ -63,7 +80,7 @@ public class EventService {
                 .toLowerCase();
     }
 
-    private Event getEventById(String eventId) {
+    public Event getEventById(String eventId) {
         return eventRepository.findById(eventId)
                 .orElseThrow(() -> new EventNotFoundException("Event with id " + eventId + " was not found"));
     }

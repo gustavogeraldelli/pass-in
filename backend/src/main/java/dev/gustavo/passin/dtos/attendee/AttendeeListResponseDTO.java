@@ -2,5 +2,9 @@ package dev.gustavo.passin.dtos.attendee;
 
 import java.util.List;
 
-public record AttendeeListResponseDTO(List<AttendeeDTO> attendees) {
+public record AttendeeListResponseDTO(List<AttendeeDTO> attendees,
+                                      Integer page,
+                                      Integer size,
+                                      Long totalElements,
+                                      Integer totalPages) {
 }

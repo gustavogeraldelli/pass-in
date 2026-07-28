@@ -2,12 +2,15 @@ package dev.gustavo.passin.controllers;
 
 import dev.gustavo.passin.dtos.attendee.AttendeeListResponseDTO;
 import dev.gustavo.passin.dtos.attendee.AttendeeRequestDTO;
+import dev.gustavo.passin.dtos.event.EventListResponseDTO;
 import dev.gustavo.passin.dtos.event.EventRequestDTO;
 import dev.gustavo.passin.dtos.event.EventResponseDTO;
 import dev.gustavo.passin.services.AttendeeService;
 import dev.gustavo.passin.services.EventService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -19,6 +22,12 @@ public class EventController {
 
     private final EventService eventService;
     private final AttendeeService attendeeService;
+
+    @GetMapping
+    public ResponseEntity<EventListResponseDTO> getEvents() {
+        EventListResponseDTO events = eventService.getEvents();
+        return ResponseEntity.ok(events);
+    }
 
     @GetMapping("/{eventId}")
     public ResponseEntity<EventResponseDTO> getEvent(@PathVariable String eventId) {
@@ -34,8 +43,13 @@ public class EventController {
     }
 
     @GetMapping("/{eventId}/attendees")
-    public ResponseEntity<AttendeeListResponseDTO> getEventAttendees(@PathVariable String eventId) {
-        AttendeeListResponseDTO attendees = attendeeService.getEventsAttendee(eventId);
+    public ResponseEntity<AttendeeListResponseDTO> getEventAttendees(@PathVariable String eventId,
+                                                                     @RequestParam(defaultValue = "0") Integer page,
+                                                                     @RequestParam(defaultValue = "10") Integer size,
+                                                                     @RequestParam(required = false) String query) {
+        eventService.getEventById(eventId);
+        Pageable pageable = PageRequest.of(normalizePage(page), normalizeSize(size));
+        AttendeeListResponseDTO attendees = attendeeService.getEventsAttendee(eventId, query, pageable);
         return ResponseEntity.ok(attendees);
     }
 
@@ -44,5 +58,13 @@ public class EventController {
         String attendeeId = eventService.registerAttendeeOnEvent(eventId, attendee);
         var uri = uriComponentsBuilder.path("/attendees/{attendeeId}/badge").buildAndExpand(attendeeId).toUri();
         return ResponseEntity.created(uri).body(attendeeId);
+    }
+
+    private int normalizePage(Integer page) {
+        return Math.max(page, 0);
+    }
+
+    private int normalizeSize(Integer size) {
+        return Math.min(Math.max(size, 1), 100);
     }
 }
