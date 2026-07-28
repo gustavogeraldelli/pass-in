@@ -78,6 +78,12 @@ cd backend
 ./mvnw spring-boot:run
 ```
 
+Swagger UI:
+
+```text
+http://localhost:8080/swagger-ui.html
+```
+
 ## Frontend
 
 The frontend is a React application located in `frontend`.
