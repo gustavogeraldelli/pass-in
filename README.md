@@ -11,7 +11,7 @@ The project was originally based on Rocketseat's NLW event and is being evolved 
 - Spring Web
 - Spring Data JPA
 - Flyway
-- HSQLDB currently, with PostgreSQL planned
+- PostgreSQL
 - React 19
 - TypeScript
 - Vite 8
@@ -31,7 +31,7 @@ The project was originally based on Rocketseat's NLW event and is being evolved 
 
 ## Planned Improvements
 
-- Replace HSQLDB with PostgreSQL and Docker Compose
+- Expand Docker Compose to run the full stack
 - Add backend DTO validation and standardized API errors
 - Add OpenAPI/Swagger documentation
 - Add event listing, attendee search, and backend pagination
@@ -43,6 +43,26 @@ The project was originally based on Rocketseat's NLW event and is being evolved 
 ## Backend
 
 The backend is a Spring Boot REST API located in `backend`.
+
+Start PostgreSQL:
+
+```bash
+docker compose up -d postgres
+```
+
+The default local database URL is:
+
+```text
+jdbc:postgresql://localhost:5432/pass_in
+```
+
+You can override the connection with:
+
+```text
+DATABASE_URL
+DATABASE_USERNAME
+DATABASE_PASSWORD
+```
 
 Run tests:
 
