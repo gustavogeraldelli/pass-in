@@ -5,74 +5,59 @@ import { TableHeader } from './table/table-header'
 import { TableCell } from './table/table-cell'
 import { TableRow } from './table/table-row'
 import { ChangeEvent, useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
+import { Attendee, getEventAttendees } from '../lib/api'
 
 dayjs.extend(relativeTime)
 
-interface Attendee {
-    id: string,
-    name: string,
-    email: string,
-    createdAt: string,  
-    checkInAt: string | null
-}
-
-interface AttendeeListResponse {
-    attendees: Attendee[],
-    page: number,
-    size: number,
-    totalElements: number,
-    totalPages: number
-}
-
-const EVENT_ID = 'ae0246f4-77a3-4d64-a949-3b95b7ed1e32'
 const PAGE_SIZE = 10
 
-export function AttendeeList() {
+interface AttendeeListProps {
+    eventId: string
+}
+
+export function AttendeeList({ eventId }: AttendeeListProps) {
+    const [searchParams, setSearchParams] = useSearchParams()
     const [page, setPage] = useState(() => {
-        const url = new URL(window.location.toString())
-        if (url.searchParams.has('page'))
-            return Number(url.searchParams.get('page'))
-        return 0
+        return Number(searchParams.get('page') ?? 0)
     })
     const [query, setQuery] = useState(() => {
-        const url = new URL(window.location.toString())
-        return url.searchParams.get('query') ?? ''
+        return searchParams.get('query') ?? ''
     })
     const [attendees, setAttendees] = useState<Attendee[]>([])
     const [totalElements, setTotalElements] = useState(0)
     const [totalPages, setTotalPages] = useState(0)
+    const [isLoading, setIsLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
     const currentPageSize = attendees.length
 
     useEffect(() => {
-        const url = new URL(`http://localhost:8080/events/${EVENT_ID}/attendees`)
-
-        url.searchParams.set('page', String(page))
-        url.searchParams.set('size', String(PAGE_SIZE))
-
-        if (query) {
-            url.searchParams.set('query', query)
-        }
-
-        fetch(url)
-        .then(response => response.json())
-        .then((data: AttendeeListResponse) => {
-            setAttendees(data.attendees)
-            setTotalElements(data.totalElements)
-            setTotalPages(data.totalPages)
-        })
-    }, [page, query])
+        getEventAttendees(eventId, page, PAGE_SIZE, query)
+            .then((data) => {
+                setAttendees(data.attendees)
+                setTotalElements(data.totalElements)
+                setTotalPages(data.totalPages)
+                setError(null)
+            })
+            .catch(() => {
+                setAttendees([])
+                setTotalElements(0)
+                setTotalPages(0)
+                setError('Nao foi possivel carregar os participantes.')
+            })
+            .finally(() => setIsLoading(false))
+    }, [eventId, page, query])
 
     function setCurrentPage(page: number) {
-        const url = new URL(window.location.toString())
-        url.searchParams.set('page', String(page))
+        const nextParams = new URLSearchParams()
+        nextParams.set('page', String(page))
         if (query) {
-            url.searchParams.set('query', query)
-        } else {
-            url.searchParams.delete('query')
+            nextParams.set('query', query)
         }
-        window.history.pushState({}, '', url)
+        setSearchParams(nextParams)
+        setIsLoading(true)
         setPage(page)
     }
 
@@ -80,15 +65,14 @@ export function AttendeeList() {
         const value = event.target.value
         setQuery(value)
 
-        const url = new URL(window.location.toString())
-        url.searchParams.set('page', '0')
+        const nextParams = new URLSearchParams()
+        nextParams.set('page', '0')
         if (value) {
-            url.searchParams.set('query', value)
-        } else {
-            url.searchParams.delete('query')
+            nextParams.set('query', value)
         }
 
-        window.history.pushState({}, '', url)
+        setSearchParams(nextParams)
+        setIsLoading(true)
         setPage(0)
     }
 
@@ -123,6 +107,12 @@ export function AttendeeList() {
                 </div>
             </div>
 
+            {error && (
+                <div className="border border-red-400/30 bg-red-400/10 rounded-lg p-4 text-sm text-red-200">
+                    {error}
+                </div>
+            )}
+
             <Table>
                 <thead>
                     <tr className='border-b border-white/10'>
@@ -137,6 +127,18 @@ export function AttendeeList() {
                     </tr>
                 </thead>
                 <tbody>
+                    {isLoading && (
+                        <TableRow>
+                            <TableCell colSpan={6}>Carregando participantes...</TableCell>
+                        </TableRow>
+                    )}
+
+                    {!isLoading && !error && attendees.length === 0 && (
+                        <TableRow>
+                            <TableCell colSpan={6}>Nenhum participante encontrado.</TableCell>
+                        </TableRow>
+                    )}
+
                     {attendees.map((attendee) => {
                         return (
                             <TableRow key={attendee.id}>

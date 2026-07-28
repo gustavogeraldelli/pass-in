@@ -6,8 +6,7 @@ export function Header() {
         <div className="flex items-center gap-5 py-2">
             <img src={icon} alt="logo" />
             <nav className="flex items-center gap-5">
-                <NavLink href='/events'>Eventos</NavLink>
-                <NavLink href='/attendees'>Participantes</NavLink>
+                <NavLink to='/events'>Eventos</NavLink>
             </nav>
         </div>
     )

@@ -1,11 +1,19 @@
-import { ComponentProps } from "react"
+import { NavLink as RouterNavLink, NavLinkProps } from "react-router-dom"
 
-interface NavLinkProps extends ComponentProps<'a'> {
+interface AppNavLinkProps extends NavLinkProps {
     children: string
 }
 
-export function NavLink(props: NavLinkProps) {
+export function NavLink(props: AppNavLinkProps) {
     return (
-        <a {...props} className="font-medium text-sm">{props.children}</a>
+        <RouterNavLink
+            {...props}
+            className={({ isActive }) => [
+                'font-medium text-sm',
+                isActive ? 'text-white' : 'text-zinc-400 hover:text-zinc-200',
+            ].join(' ')}
+        >
+            {props.children}
+        </RouterNavLink>
     )
 }
