@@ -30,7 +30,7 @@ public class AttendeeService {
     }
 
     public Integer countAttendeesFromEvent(String eventId) {
-        return attendeeRepository.countByEventId(eventId);
+        return Math.toIntExact(attendeeRepository.countByEventId(eventId));
     }
 
     public AttendeeListResponseDTO getEventsAttendee(String eventId, String query, Pageable pageable) {

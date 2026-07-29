@@ -9,6 +9,8 @@ import { Link, useSearchParams } from 'react-router-dom'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { Attendee, getEventAttendees } from '../lib/api'
+import { Alert } from './alert'
+import { getFriendlyErrorMessage } from '../lib/errors'
 
 dayjs.extend(relativeTime)
 
@@ -41,11 +43,11 @@ export function AttendeeList({ eventId }: AttendeeListProps) {
                 setTotalPages(data.totalPages)
                 setError(null)
             })
-            .catch(() => {
+            .catch((error: Error) => {
                 setAttendees([])
                 setTotalElements(0)
                 setTotalPages(0)
-                setError('Nao foi possivel carregar os participantes.')
+                setError(getFriendlyErrorMessage(error, 'Nao foi possivel carregar os participantes.'))
             })
             .finally(() => setIsLoading(false))
     }, [eventId, page, query])
@@ -94,9 +96,9 @@ export function AttendeeList({ eventId }: AttendeeListProps) {
 
     return (
         <div className='flex flex-col gap-4'>
-            <div className="flex gap-3 items-center">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                 <h1 className="text-2xl font-bold">Participantes</h1>
-                <div className="w-72 px-3 py-1.5 border border-white/10 rounded-lg flex items-center gap-3">
+                <div className="w-full px-3 py-1.5 border border-white/10 rounded-lg flex items-center gap-3 sm:w-72">
                     <Search className="size-4 text-emerald-300" />
                     <input
                         className="bg-transparent flex-1 outline-none h-auto border-0 p-0 text-sm focus:ring-0"
@@ -108,9 +110,9 @@ export function AttendeeList({ eventId }: AttendeeListProps) {
             </div>
 
             {error && (
-                <div className="border border-red-400/30 bg-red-400/10 rounded-lg p-4 text-sm text-red-200">
+                <Alert>
                     {error}
-                </div>
+                </Alert>
             )}
 
             <Table>
@@ -129,13 +131,13 @@ export function AttendeeList({ eventId }: AttendeeListProps) {
                 <tbody>
                     {isLoading && (
                         <TableRow>
-                            <TableCell colSpan={6}>Carregando participantes...</TableCell>
+                            <TableCell colSpan={6} className="text-zinc-400">Carregando participantes...</TableCell>
                         </TableRow>
                     )}
 
                     {!isLoading && !error && attendees.length === 0 && (
                         <TableRow>
-                            <TableCell colSpan={6}>Nenhum participante encontrado.</TableCell>
+                            <TableCell colSpan={6} className="text-zinc-400">Nenhum participante encontrado.</TableCell>
                         </TableRow>
                     )}
 
@@ -173,7 +175,7 @@ export function AttendeeList({ eventId }: AttendeeListProps) {
                     </TableCell>
                     <TableCell className='text-right' colSpan={3}>
                         <div className='inline-flex items-center gap-8'>
-                            <span>Página {totalPages === 0 ? 0 : page + 1} de {totalPages}</span>
+                            <span className="whitespace-nowrap">Página {totalPages === 0 ? 0 : page + 1} de {totalPages}</span>
                             
                             <div className='flex gap-1.5'>
                                 <IconButton onClick={goToFirstPage} disabled={page === 0}>

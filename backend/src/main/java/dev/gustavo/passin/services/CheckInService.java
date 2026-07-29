@@ -33,4 +33,8 @@ public class CheckInService {
     public Optional<CheckIn> getCheckIn(String attendeeId) {
         return checkInRepository.findByAttendeeId(attendeeId);
     }
+
+    public Integer countCheckInsFromEvent(String eventId) {
+        return Math.toIntExact(checkInRepository.countByAttendeeEventId(eventId));
+    }
 }

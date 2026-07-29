@@ -5,6 +5,7 @@ export interface Event {
     slug: string
     maximumAttendees: number
     numberOfAttendees: number
+    numberOfCheckIns: number
 }
 
 export interface EventListResponse {

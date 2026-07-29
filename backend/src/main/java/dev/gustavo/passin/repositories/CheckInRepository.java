@@ -9,4 +9,6 @@ public interface CheckInRepository extends JpaRepository<CheckIn, Integer> {
 
     Optional<CheckIn> findByAttendeeId(String attendeeId);
 
+    Long countByAttendeeEventId(String eventId);
+
 }

@@ -12,7 +12,7 @@ import java.util.Optional;
 public interface AttendeeRepository extends JpaRepository<Attendee, String> {
     List<Attendee> findByEventId(String eventId);
     Optional<Attendee> findByEventIdAndEmail(String eventId, String email);
-    Integer countByEventId(String eventId);
+    Long countByEventId(String eventId);
 
     @Query("""
             SELECT attendee FROM Attendee attendee

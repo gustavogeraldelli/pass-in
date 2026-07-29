@@ -3,6 +3,10 @@ import { useEffect, useState } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { QRCodeSVG } from 'qrcode.react'
 import { AttendeeBadge, checkInAttendee, getAttendeeBadge } from '../lib/api'
+import { Alert } from '../components/alert'
+import { Button } from '../components/button'
+import { EmptyState } from '../components/empty-state'
+import { getFriendlyErrorMessage } from '../lib/errors'
 
 type CheckInStatus = 'idle' | 'loading' | 'success' | 'error'
 
@@ -24,7 +28,7 @@ export function AttendeeBadgePage() {
                 setBadge(data)
                 setError(null)
             })
-            .catch((error: Error) => setError(error.message || 'Nao foi possivel carregar o badge.'))
+            .catch((error: Error) => setError(getFriendlyErrorMessage(error, 'Nao foi possivel carregar o badge.')))
             .finally(() => setIsLoading(false))
     }, [attendeeId])
 
@@ -43,7 +47,7 @@ export function AttendeeBadgePage() {
             })
             .catch((error: Error) => {
                 setCheckInStatus('error')
-                setCheckInMessage(error.message || 'Nao foi possivel realizar o check-in.')
+                setCheckInMessage(getFriendlyErrorMessage(error, 'Nao foi possivel realizar o check-in.'))
             })
     }
 
@@ -55,15 +59,15 @@ export function AttendeeBadgePage() {
             </Link>
 
             {isLoading && (
-                <div className="border border-white/10 rounded-lg p-4 text-sm text-zinc-400">
+                <EmptyState>
                     Carregando badge...
-                </div>
+                </EmptyState>
             )}
 
             {error && (
-                <div className="border border-red-400/30 bg-red-400/10 rounded-lg p-4 text-sm text-red-200">
+                <Alert>
                     {error}
-                </div>
+                </Alert>
             )}
 
             {badge && (
@@ -90,15 +94,14 @@ export function AttendeeBadgePage() {
                         </div>
 
                         <div className="flex flex-wrap items-center gap-3">
-                            <button
+                            <Button
                                 type="button"
                                 onClick={handleCheckIn}
                                 disabled={checkInStatus === 'loading' || checkInStatus === 'success'}
-                                className="inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-black disabled:opacity-60"
                             >
                                 {checkInStatus === 'loading' ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />}
                                 Fazer check-in
-                            </button>
+                            </Button>
 
                             {checkInMessage && (
                                 <span className={checkInStatus === 'error' ? 'text-sm text-red-200' : 'text-sm text-emerald-300'}>

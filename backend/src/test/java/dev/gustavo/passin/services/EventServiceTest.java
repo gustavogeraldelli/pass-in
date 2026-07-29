@@ -33,6 +33,9 @@ class EventServiceTest {
     @Mock
     private AttendeeService attendeeService;
 
+    @Mock
+    private CheckInService checkInService;
+
     @InjectMocks
     private EventService eventService;
 

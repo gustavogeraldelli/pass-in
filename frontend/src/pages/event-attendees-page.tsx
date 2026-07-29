@@ -1,8 +1,13 @@
-import { ArrowLeft, Loader2, UserPlus, Users } from 'lucide-react'
+import { ArrowLeft, CheckCircle2, Loader2, Ticket, UserCheck, UserPlus, Users } from 'lucide-react'
 import { FormEvent, useEffect, useState } from 'react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import { AttendeeList } from '../components/attendee-list'
+import { Alert } from '../components/alert'
+import { Button } from '../components/button'
+import { EmptyState } from '../components/empty-state'
+import { Input } from '../components/input'
 import { Event, getEvent, registerAttendee } from '../lib/api'
+import { getFriendlyErrorMessage } from '../lib/errors'
 
 export function EventAttendeesPage() {
     const { eventId } = useParams()
@@ -25,7 +30,7 @@ export function EventAttendeesPage() {
                 setEvent(data.event)
                 setError(null)
             })
-            .catch(() => setError('Nao foi possivel carregar o evento.'))
+            .catch((error: Error) => setError(getFriendlyErrorMessage(error, 'Nao foi possivel carregar o evento.')))
             .finally(() => setIsLoading(false))
     }, [eventId])
 
@@ -40,9 +45,11 @@ export function EventAttendeesPage() {
 
         registerAttendee(eventId!, { name, email })
             .then((attendeeId) => navigate(`/attendees/${attendeeId}/badge`))
-            .catch((error: Error) => setRegistrationError(error.message || 'Nao foi possivel realizar a inscricao.'))
+            .catch((error: Error) => setRegistrationError(getFriendlyErrorMessage(error, 'Nao foi possivel realizar a inscricao.')))
             .finally(() => setIsRegistering(false))
     }
+
+    const remainingSeats = event ? event.maximumAttendees - event.numberOfAttendees : 0
 
     return (
         <main className="flex flex-col gap-5">
@@ -52,20 +59,20 @@ export function EventAttendeesPage() {
             </Link>
 
             {isLoading && (
-                <div className="border border-white/10 rounded-lg p-4 text-sm text-zinc-400">
+                <EmptyState>
                     Carregando evento...
-                </div>
+                </EmptyState>
             )}
 
             {error && (
-                <div className="border border-red-400/30 bg-red-400/10 rounded-lg p-4 text-sm text-red-200">
+                <Alert>
                     {error}
-                </div>
+                </Alert>
             )}
 
             {event && (
                 <div className="grid gap-5 lg:grid-cols-[1fr_360px]">
-                    <section className="flex flex-col gap-2">
+                    <section className="flex flex-col gap-4">
                         <div className="flex items-center gap-3">
                             <h1 className="text-2xl font-bold">{event.title}</h1>
                             <div className="inline-flex items-center gap-2 text-sm text-zinc-400">
@@ -74,6 +81,29 @@ export function EventAttendeesPage() {
                             </div>
                         </div>
                         <p className="text-sm text-zinc-400">{event.details}</p>
+
+                        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                            <div className="border border-white/10 rounded-lg p-4 bg-white/[0.02]">
+                                <Ticket className="mb-3 size-5 text-emerald-300" />
+                                <span className="text-xs uppercase text-zinc-500">Total de vagas</span>
+                                <p className="text-2xl font-semibold text-white">{event.maximumAttendees}</p>
+                            </div>
+                            <div className="border border-white/10 rounded-lg p-4 bg-white/[0.02]">
+                                <Users className="mb-3 size-5 text-emerald-300" />
+                                <span className="text-xs uppercase text-zinc-500">Inscritos</span>
+                                <p className="text-2xl font-semibold text-white">{event.numberOfAttendees}</p>
+                            </div>
+                            <div className="border border-white/10 rounded-lg p-4 bg-white/[0.02]">
+                                <UserCheck className="mb-3 size-5 text-emerald-300" />
+                                <span className="text-xs uppercase text-zinc-500">Check-ins</span>
+                                <p className="text-2xl font-semibold text-white">{event.numberOfCheckIns}</p>
+                            </div>
+                            <div className="border border-white/10 rounded-lg p-4 bg-white/[0.02]">
+                                <CheckCircle2 className="mb-3 size-5 text-emerald-300" />
+                                <span className="text-xs uppercase text-zinc-500">Vagas restantes</span>
+                                <p className="text-2xl font-semibold text-white">{remainingSeats}</p>
+                            </div>
+                        </div>
                     </section>
 
                     <form onSubmit={handleSubmit} className="border border-white/10 rounded-lg p-4 flex flex-col gap-3 bg-white/[0.02]">
@@ -82,16 +112,14 @@ export function EventAttendeesPage() {
                             <h2 className="font-semibold text-white">Nova inscricao</h2>
                         </div>
 
-                        <input
-                            className="w-full rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-sm outline-none focus:border-emerald-300"
+                        <Input
                             placeholder="Nome"
                             value={name}
                             onChange={(event) => setName(event.target.value)}
                             required
                         />
 
-                        <input
-                            className="w-full rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-sm outline-none focus:border-emerald-300"
+                        <Input
                             placeholder="Email"
                             type="email"
                             value={email}
@@ -103,14 +131,13 @@ export function EventAttendeesPage() {
                             <span className="text-sm text-red-200">{registrationError}</span>
                         )}
 
-                        <button
+                        <Button
                             type="submit"
                             disabled={isRegistering}
-                            className="inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-black disabled:opacity-60"
                         >
                             {isRegistering ? <Loader2 className="size-4 animate-spin" /> : <UserPlus className="size-4" />}
                             Inscrever
-                        </button>
+                        </Button>
                     </form>
                 </div>
             )}

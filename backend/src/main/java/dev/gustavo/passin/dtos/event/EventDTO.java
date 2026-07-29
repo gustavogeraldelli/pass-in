@@ -5,5 +5,6 @@ public record EventDTO(String id,
                        String details,
                        String slug,
                        Integer maximumAttendees,
-                       Integer numberOfAttendees) {
+                       Integer numberOfAttendees,
+                       Integer numberOfCheckIns) {
 }

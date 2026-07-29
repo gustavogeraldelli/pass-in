@@ -56,6 +56,15 @@ class CheckInServiceTest {
         verify(checkInRepository, never()).save(any(CheckIn.class));
     }
 
+    @Test
+    void shouldCountCheckInsFromEvent() {
+        when(checkInRepository.countByAttendeeEventId("event-1")).thenReturn(3L);
+
+        Integer count = checkInService.countCheckInsFromEvent("event-1");
+
+        assertThat(count).isEqualTo(3);
+    }
+
     private Attendee attendee(String id) {
         Attendee attendee = new Attendee();
         attendee.setId(id);

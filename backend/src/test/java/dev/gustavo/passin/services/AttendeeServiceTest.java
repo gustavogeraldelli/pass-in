@@ -48,6 +48,15 @@ class AttendeeServiceTest {
     }
 
     @Test
+    void shouldCountAttendeesFromEvent() {
+        when(attendeeRepository.countByEventId("event-1")).thenReturn(12L);
+
+        Integer count = attendeeService.countAttendeesFromEvent("event-1");
+
+        assertThat(count).isEqualTo(12);
+    }
+
+    @Test
     void shouldReturnPaginatedAttendeesWithCheckInStatus() {
         Event event = event("event-1");
         Attendee attendee = attendee("attendee-1", event);

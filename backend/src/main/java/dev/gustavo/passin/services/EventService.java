@@ -23,6 +23,7 @@ public class EventService {
 
     private final EventRepository eventRepository;
     private final AttendeeService attendeeService;
+    private final CheckInService checkInService;
 
     public EventListResponseDTO getEvents() {
         List<EventDTO> events = eventRepository.findAll()
@@ -33,7 +34,8 @@ public class EventService {
                         event.getDetails(),
                         event.getSlug(),
                         event.getMaximumAttendees(),
-                        attendeeService.countAttendeesFromEvent(event.getId())))
+                        attendeeService.countAttendeesFromEvent(event.getId()),
+                        checkInService.countCheckInsFromEvent(event.getId())))
                 .toList();
 
         return new EventListResponseDTO(events);
@@ -42,7 +44,8 @@ public class EventService {
     public EventResponseDTO getEvent(String eventId) {
         Event event = getEventById(eventId);
         Integer attendeeCount = attendeeService.countAttendeesFromEvent(eventId);
-        return new EventResponseDTO(event, attendeeCount);
+        Integer checkInCount = checkInService.countCheckInsFromEvent(eventId);
+        return new EventResponseDTO(event, attendeeCount, checkInCount);
     }
 
     public String createEvent(EventRequestDTO eventRequestDTO) {
