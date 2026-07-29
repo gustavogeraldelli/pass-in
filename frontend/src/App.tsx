@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from "react-router-dom"
 import { Header } from "./components/header"
+import { AttendeeBadgePage } from "./pages/attendee-badge-page"
 import { EventAttendeesPage } from "./pages/event-attendees-page"
 import { EventsPage } from "./pages/events-page"
 
@@ -13,6 +14,7 @@ function App() {
         <Route path="/events" element={<EventsPage />} />
         <Route path="/events/:eventId" element={<EventAttendeesPage />} />
         <Route path="/events/:eventId/attendees" element={<EventAttendeesPage />} />
+        <Route path="/attendees/:attendeeId/badge" element={<AttendeeBadgePage />} />
         <Route path="*" element={<Navigate to="/events" replace />} />
       </Routes>
     </div>

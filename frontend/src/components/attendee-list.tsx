@@ -1,11 +1,11 @@
-import { Search, MoreHorizontal, ChevronsLeft, ChevronLeft, ChevronRight, ChevronsRight } from 'lucide-react'
+import { Search, Ticket, ChevronsLeft, ChevronLeft, ChevronRight, ChevronsRight } from 'lucide-react'
 import { IconButton } from './icon-button'
 import { Table } from './table/table'
 import { TableHeader } from './table/table-header'
 import { TableCell } from './table/table-cell'
 import { TableRow } from './table/table-row'
 import { ChangeEvent, useEffect, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import { Attendee, getEventAttendees } from '../lib/api'
@@ -155,9 +155,13 @@ export function AttendeeList({ eventId }: AttendeeListProps) {
                                 <TableCell>{dayjs().to(attendee.createdAt)}</TableCell>
                                 <TableCell>{attendee.checkInAt === null ? '' : dayjs().to(attendee.checkInAt)}</TableCell>
                                 <TableCell>
-                                    <IconButton transparent>
-                                        <MoreHorizontal className="size-4" />
-                                    </IconButton>
+                                    <Link
+                                        to={`/attendees/${attendee.id}/badge`}
+                                        className="inline-flex border border-white/10 rounded-md p-1.5 bg-black/20"
+                                        title="Abrir badge"
+                                    >
+                                        <Ticket className="size-4" />
+                                    </Link>
                                 </TableCell>
                             </TableRow>
                         )

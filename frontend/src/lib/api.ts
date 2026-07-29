@@ -27,13 +27,47 @@ export interface AttendeeListResponse {
     totalPages: number
 }
 
+export interface AttendeeBadge {
+    name: string
+    email: string
+    checkInUrl: string
+    eventId: string
+}
+
+export interface ApiError {
+    message: string
+    fields?: Array<{
+        field: string
+        message: string
+    }>
+}
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080'
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
     const response = await fetch(`${API_BASE_URL}${path}`, init)
 
     if (!response.ok) {
-        throw new Error(`Request failed with status ${response.status}`)
+        const error = await readError(response)
+        throw new Error(error.message || `Request failed with status ${response.status}`)
+    }
+
+    if (response.status === 204) {
+        return undefined as T
+    }
+
+    const contentType = response.headers.get('content-type') ?? ''
+    if (contentType.includes('application/json')) {
+        return response.json()
+    }
+
+    return response.text() as Promise<T>
+}
+
+async function readError(response: Response): Promise<ApiError> {
+    const contentType = response.headers.get('content-type') ?? ''
+    if (!contentType.includes('application/json')) {
+        return { message: await response.text() }
     }
 
     return response.json()
@@ -58,4 +92,24 @@ export function getEventAttendees(eventId: string, page: number, size: number, q
     }
 
     return request<AttendeeListResponse>(`/events/${eventId}/attendees?${searchParams}`)
+}
+
+export function registerAttendee(eventId: string, attendee: { name: string, email: string }) {
+    return request<string>(`/events/${eventId}/attendees`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(attendee),
+    })
+}
+
+export function getAttendeeBadge(attendeeId: string) {
+    return request<AttendeeBadge>(`/attendees/${attendeeId}/badge`)
+}
+
+export function checkInAttendee(attendeeId: string) {
+    return request<void>(`/attendees/${attendeeId}/check-in`, {
+        method: 'POST',
+    })
 }
