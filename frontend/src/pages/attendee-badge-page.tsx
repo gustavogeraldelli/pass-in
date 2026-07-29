@@ -40,7 +40,11 @@ export function AttendeeBadgePage() {
         setCheckInStatus('loading')
         setCheckInMessage(null)
 
-        checkInAttendee(attendeeId!)
+        if (!badge) {
+            return
+        }
+
+        checkInAttendee(badge.checkInToken)
             .then(() => {
                 setCheckInStatus('success')
                 setCheckInMessage('Check-in realizado.')
@@ -50,6 +54,8 @@ export function AttendeeBadgePage() {
                 setCheckInMessage(getFriendlyErrorMessage(error, 'Nao foi possivel realizar o check-in.'))
             })
     }
+
+    const qrCodeUrl = badge ? `${window.location.origin}/check-ins/${badge.checkInToken}` : ''
 
     return (
         <main className="flex flex-col gap-5">
@@ -118,7 +124,7 @@ export function AttendeeBadgePage() {
                             QR Code de check-in
                         </div>
                         <div className="rounded-lg bg-white p-4">
-                            <QRCodeSVG value={badge.checkInUrl} size={224} />
+                            <QRCodeSVG value={qrCodeUrl} size={224} />
                         </div>
                     </aside>
                 </div>

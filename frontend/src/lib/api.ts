@@ -32,6 +32,7 @@ export interface AttendeeBadge {
     name: string
     email: string
     checkInUrl: string
+    checkInToken: string
     eventId: string
 }
 
@@ -109,8 +110,8 @@ export function getAttendeeBadge(attendeeId: string) {
     return request<AttendeeBadge>(`/attendees/${attendeeId}/badge`)
 }
 
-export function checkInAttendee(attendeeId: string) {
-    return request<void>(`/attendees/${attendeeId}/check-in`, {
+export function checkInAttendee(checkInToken: string) {
+    return request<void>(`/check-ins/${checkInToken}`, {
         method: 'POST',
     })
 }

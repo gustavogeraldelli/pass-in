@@ -24,6 +24,7 @@ public class AttendeeService {
 
     private final AttendeeRepository attendeeRepository;
     private final CheckInService checkInService;
+    private final CheckInTokenService checkInTokenService;
 
     public List<Attendee> getAllAttendeesFromEvent(String eventId) {
         return attendeeRepository.findByEventId(eventId);
@@ -59,16 +60,23 @@ public class AttendeeService {
 
     public AttendeeBadgeResponseDTO getAttendeeBadge(String attendeeId, UriComponentsBuilder uriComponentsBuilder) {
         Attendee attendee = getAttendee(attendeeId);
-        var uri = uriComponentsBuilder.path("/attendees/{attendeeId}/check-in").buildAndExpand(attendeeId).toUri().toString();
+        String checkInToken = checkInTokenService.generateToken(attendee.getId());
+        var uri = uriComponentsBuilder.path("/check-ins/{token}").buildAndExpand(checkInToken).toUri().toString();
         return new AttendeeBadgeResponseDTO(attendee.getName(),
                 attendee.getEmail(),
                 uri,
+                checkInToken,
                 attendee.getEvent().getId());
     }
 
     public void checkInAttendee(String attendeeId) {
         Attendee attendee = getAttendee(attendeeId);
         checkInService.checkIn(attendee);
+    }
+
+    public void checkInAttendeeByToken(String token) {
+        String attendeeId = checkInTokenService.getAttendeeId(token);
+        checkInAttendee(attendeeId);
     }
 
     private Attendee getAttendee(String attendeeId) {

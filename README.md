@@ -120,6 +120,8 @@ DATABASE_USERNAME=pass_in
 DATABASE_PASSWORD=pass_in
 FRONTEND_ORIGIN=http://localhost:9090
 VITE_API_BASE_URL=http://localhost:8080
+CHECK_IN_TOKEN_SECRET=change-me
+CHECK_IN_TOKEN_TTL=PT24H
 ```
 
 Frontend-only `.env.example`:
@@ -139,7 +141,7 @@ GET  /events/{eventId}
 GET  /events/{eventId}/attendees?page=0&size=10&query=
 POST /events/{eventId}/attendees
 GET  /attendees/{attendeeId}/badge
-POST /attendees/{attendeeId}/check-in
+POST /check-ins/{token}
 ```
 
 Swagger UI:
@@ -177,12 +179,11 @@ docker compose build
 - Flyway owns the database schema and indexes.
 - Backend pagination/search avoids loading all attendees into the browser.
 - The frontend uses React Router instead of hardcoded event state.
-- QR code badges use the existing check-in endpoint.
+- QR code badges use signed check-in tokens.
 - Backend unit tests cover event capacity, duplicate registration, badge generation, and duplicate check-ins.
 
 ## Limitations
 
 - There is no authentication or organizer role yet.
-- Check-in uses the attendee id endpoint directly instead of a signed token.
 - Email delivery is not implemented.
 - The dashboard is intentionally simple and focused on the event workflow.

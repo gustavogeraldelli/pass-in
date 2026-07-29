@@ -20,11 +20,4 @@ public class AttendeeController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/{attendeeId}/check-in")
-    public ResponseEntity<Void> checkInAttendee(@PathVariable String attendeeId, UriComponentsBuilder uriComponentsBuilder) {
-        service.checkInAttendee(attendeeId);
-        var uri = uriComponentsBuilder.path("/attendees/{attendeeId}/badge").buildAndExpand(attendeeId).toUri();
-        return ResponseEntity.created(uri).build();
-    }
-
 }

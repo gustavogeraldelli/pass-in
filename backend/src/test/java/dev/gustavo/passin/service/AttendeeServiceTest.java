@@ -34,6 +34,9 @@ class AttendeeServiceTest {
     @Mock
     private CheckInService checkInService;
 
+    @Mock
+    private CheckInTokenService checkInTokenService;
+
     @InjectMocks
     private AttendeeService attendeeService;
 
@@ -86,13 +89,15 @@ class AttendeeServiceTest {
         UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString("http://localhost:8080");
 
         when(attendeeRepository.findById("attendee-1")).thenReturn(Optional.of(attendee));
+        when(checkInTokenService.generateToken("attendee-1")).thenReturn("signed-token");
 
         var response = attendeeService.getAttendeeBadge("attendee-1", uriBuilder);
 
         assertThat(response.name()).isEqualTo("Ana");
         assertThat(response.email()).isEqualTo("ana@example.com");
         assertThat(response.eventId()).isEqualTo("event-1");
-        assertThat(response.checkInUrl()).isEqualTo("http://localhost:8080/attendees/attendee-1/check-in");
+        assertThat(response.checkInToken()).isEqualTo("signed-token");
+        assertThat(response.checkInUrl()).isEqualTo("http://localhost:8080/check-ins/signed-token");
     }
 
     @Test
@@ -112,6 +117,17 @@ class AttendeeServiceTest {
         when(attendeeRepository.findById("attendee-1")).thenReturn(Optional.of(attendee));
 
         attendeeService.checkInAttendee("attendee-1");
+
+        verify(checkInService).checkIn(attendee);
+    }
+
+    @Test
+    void shouldCheckInAttendeeByToken() {
+        Attendee attendee = attendee("attendee-1", event("event-1"));
+        when(checkInTokenService.getAttendeeId("signed-token")).thenReturn("attendee-1");
+        when(attendeeRepository.findById("attendee-1")).thenReturn(Optional.of(attendee));
+
+        attendeeService.checkInAttendeeByToken("signed-token");
 
         verify(checkInService).checkIn(attendee);
     }

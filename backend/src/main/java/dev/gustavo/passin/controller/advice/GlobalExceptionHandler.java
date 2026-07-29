@@ -5,6 +5,7 @@ import dev.gustavo.passin.exception.AttendeeNotFoundException;
 import dev.gustavo.passin.exception.AttendeeAlreadyCheckedInException;
 import dev.gustavo.passin.exception.EventIsFullException;
 import dev.gustavo.passin.exception.EventNotFoundException;
+import dev.gustavo.passin.exception.InvalidCheckInTokenException;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -43,6 +44,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(EventIsFullException.class)
     public ResponseEntity<ApiErrorResponseDTO> handleEventIsFull(EventIsFullException exception, HttpServletRequest request) {
         return buildError(HttpStatus.CONFLICT, exception.getMessage(), request);
+    }
+
+    @ExceptionHandler(InvalidCheckInTokenException.class)
+    public ResponseEntity<ApiErrorResponseDTO> handleInvalidCheckInToken(InvalidCheckInTokenException exception, HttpServletRequest request) {
+        return buildError(HttpStatus.BAD_REQUEST, exception.getMessage(), request);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
