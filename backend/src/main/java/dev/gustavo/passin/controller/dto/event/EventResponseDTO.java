@@ -1,0 +1,20 @@
+package dev.gustavo.passin.controller.dto.event;
+
+import dev.gustavo.passin.entity.Event;
+import lombok.Getter;
+
+@Getter
+public class EventResponseDTO {
+
+    EventDTO event;
+
+    public EventResponseDTO(Event event, Integer numberOfAttendees, Integer numberOfCheckIns) {
+        this.event = new EventDTO(event.getId(),
+                event.getTitle(),
+                event.getDetails(),
+                event.getSlug(),
+                event.getMaximumAttendees(),
+                numberOfAttendees,
+                numberOfCheckIns);
+    }
+}
