@@ -1,12 +1,23 @@
-import { CalendarDays, ChevronRight, Users } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { Event, getEvents } from '../lib/api'
+import { CalendarDays, ChevronRight, Loader2, Plus, Users } from 'lucide-react'
+import { FormEvent, useEffect, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { Alert } from '../components/alert'
+import { Button } from '../components/button'
+import { EmptyState } from '../components/empty-state'
+import { Input } from '../components/input'
+import { createEvent, Event, getEvents } from '../lib/api'
+import { getFriendlyErrorMessage } from '../lib/errors'
 
 export function EventsPage() {
+    const navigate = useNavigate()
     const [events, setEvents] = useState<Event[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
+    const [title, setTitle] = useState('')
+    const [details, setDetails] = useState('')
+    const [maximumAttendees, setMaximumAttendees] = useState('')
+    const [creationError, setCreationError] = useState<string | null>(null)
+    const [isCreating, setIsCreating] = useState(false)
 
     useEffect(() => {
         getEvents()
@@ -14,9 +25,24 @@ export function EventsPage() {
                 setEvents(data.events)
                 setError(null)
             })
-            .catch(() => setError('Nao foi possivel carregar os eventos.'))
+            .catch((error: Error) => setError(getFriendlyErrorMessage(error, 'Nao foi possivel carregar os eventos.')))
             .finally(() => setIsLoading(false))
     }, [])
+
+    function handleCreateEvent(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault()
+        setIsCreating(true)
+        setCreationError(null)
+
+        createEvent({
+            title,
+            details,
+            maximumAttendees: Number(maximumAttendees),
+        })
+            .then((eventId) => navigate(`/events/${eventId}`))
+            .catch((error: Error) => setCreationError(getFriendlyErrorMessage(error, 'Nao foi possivel criar o evento.')))
+            .finally(() => setIsCreating(false))
+    }
 
     return (
         <main className="flex flex-col gap-4">
@@ -24,22 +50,58 @@ export function EventsPage() {
                 <h1 className="text-2xl font-bold">Eventos</h1>
             </div>
 
+            <form onSubmit={handleCreateEvent} className="border border-white/10 rounded-lg p-4 grid gap-3 bg-white/[0.02] lg:grid-cols-[1fr_1fr_180px_auto]">
+                <Input
+                    placeholder="Titulo do evento"
+                    value={title}
+                    onChange={(event) => setTitle(event.target.value)}
+                    required
+                />
+
+                <Input
+                    placeholder="Descricao"
+                    value={details}
+                    onChange={(event) => setDetails(event.target.value)}
+                    required
+                />
+
+                <Input
+                    placeholder="Vagas"
+                    type="number"
+                    min={1}
+                    value={maximumAttendees}
+                    onChange={(event) => setMaximumAttendees(event.target.value)}
+                    required
+                />
+
+                <Button type="submit" disabled={isCreating}>
+                    {isCreating ? <Loader2 className="size-4 animate-spin" /> : <Plus className="size-4" />}
+                    Criar
+                </Button>
+
+                {creationError && (
+                    <div className="lg:col-span-4">
+                        <Alert>{creationError}</Alert>
+                    </div>
+                )}
+            </form>
+
             {isLoading && (
-                <div className="border border-white/10 rounded-lg p-4 text-sm text-zinc-400">
+                <EmptyState>
                     Carregando eventos...
-                </div>
+                </EmptyState>
             )}
 
             {error && (
-                <div className="border border-red-400/30 bg-red-400/10 rounded-lg p-4 text-sm text-red-200">
+                <Alert>
                     {error}
-                </div>
+                </Alert>
             )}
 
             {!isLoading && !error && events.length === 0 && (
-                <div className="border border-white/10 rounded-lg p-4 text-sm text-zinc-400">
-                    Nenhum evento cadastrado.
-                </div>
+                <EmptyState>
+                    Nenhum evento cadastrado. Crie o primeiro evento pelo formulario acima.
+                </EmptyState>
             )}
 
             <div className="grid gap-3">

@@ -12,6 +12,12 @@ export interface EventListResponse {
     events: Event[]
 }
 
+export interface EventRequest {
+    title: string
+    details: string
+    maximumAttendees: number
+}
+
 export interface Attendee {
     id: string
     name: string
@@ -81,6 +87,16 @@ export function getEvents() {
 
 export function getEvent(eventId: string) {
     return request<{ event: Event }>(`/events/${eventId}`)
+}
+
+export function createEvent(event: EventRequest) {
+    return request<string>('/events', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(event),
+    })
 }
 
 export function getEventAttendees(eventId: string, page: number, size: number, query: string) {
