@@ -2,6 +2,7 @@ package dev.gustavo.passin.service;
 
 import dev.gustavo.passin.entity.Attendee;
 import dev.gustavo.passin.entity.Event;
+import dev.gustavo.passin.entity.Organizer;
 import dev.gustavo.passin.exception.EventIsFullException;
 import dev.gustavo.passin.exception.EventNotFoundException;
 import dev.gustavo.passin.controller.dto.attendee.AttendeeRegistrationRequestDTO;
@@ -63,12 +64,69 @@ class EventServiceTest {
     }
 
     @Test
+    void shouldCreateEventForOrganizer() {
+        Organizer organizer = organizer("organizer-1");
+        when(eventRepository.save(any(Event.class))).thenAnswer(invocation -> {
+            Event event = invocation.getArgument(0);
+            event.setId("event-1");
+            return event;
+        });
+
+        String eventId = eventService.createEventForOrganizer(new EventCreateRequestDTO(
+                "Java Conf",
+                "Backend event",
+                100), organizer);
+
+        ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
+        verify(eventRepository).save(eventCaptor.capture());
+        Event savedEvent = eventCaptor.getValue();
+
+        assertThat(eventId).isEqualTo("event-1");
+        assertThat(savedEvent.getOrganizer()).isEqualTo(organizer);
+    }
+
+    @Test
+    void shouldReturnEventsByOrganizer() {
+        Event event = event("event-1", 100);
+        event.setOrganizer(organizer("organizer-1"));
+        when(eventRepository.findAllByOrganizerId("organizer-1")).thenReturn(List.of(event));
+        when(attendeeService.countAttendeesFromEvent("event-1")).thenReturn(3);
+        when(checkInService.countCheckInsFromEvent("event-1")).thenReturn(2);
+
+        var response = eventService.getEventsByOrganizer("organizer-1");
+
+        assertThat(response.events()).hasSize(1);
+        assertThat(response.events().getFirst().id()).isEqualTo("event-1");
+        assertThat(response.events().getFirst().numberOfAttendees()).isEqualTo(3);
+        assertThat(response.events().getFirst().numberOfCheckIns()).isEqualTo(2);
+    }
+
+    @Test
     void shouldThrowWhenEventDoesNotExist() {
         when(eventRepository.findById("missing-event")).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> eventService.getEventById("missing-event"))
                 .isInstanceOf(EventNotFoundException.class)
                 .hasMessage("Event with id missing-event was not found");
+    }
+
+    @Test
+    void shouldThrowWhenOrganizerEventDoesNotExist() {
+        when(eventRepository.findByIdAndOrganizerId("event-1", "organizer-1")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> eventService.getEventByIdAndOrganizer("event-1", "organizer-1"))
+                .isInstanceOf(EventNotFoundException.class)
+                .hasMessage("Event with id event-1 was not found");
+    }
+
+    @Test
+    void shouldReturnOrganizerEvent() {
+        Event event = event("event-1", 100);
+        when(eventRepository.findByIdAndOrganizerId("event-1", "organizer-1")).thenReturn(Optional.of(event));
+
+        Event response = eventService.getEventByIdAndOrganizer("event-1", "organizer-1");
+
+        assertThat(response).isEqualTo(event);
     }
 
     @Test
@@ -133,5 +191,14 @@ class EventServiceTest {
         attendee.setEmail("gus@example.com");
         attendee.setEvent(event);
         return attendee;
+    }
+
+    private Organizer organizer(String id) {
+        Organizer organizer = new Organizer();
+        organizer.setId(id);
+        organizer.setName("Gustavo");
+        organizer.setEmail("gus@example.com");
+        organizer.setPasswordHash("hashed-password");
+        return organizer;
     }
 }

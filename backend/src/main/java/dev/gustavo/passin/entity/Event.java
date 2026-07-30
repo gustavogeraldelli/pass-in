@@ -30,4 +30,8 @@ public class Event {
 
     @Column(nullable = false, name = "maximum_attendees")
     private Integer maximumAttendees;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "organizer_id")
+    private Organizer organizer;
 }

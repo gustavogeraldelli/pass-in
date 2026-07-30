@@ -2,6 +2,7 @@ package dev.gustavo.passin.service;
 
 import dev.gustavo.passin.entity.Attendee;
 import dev.gustavo.passin.entity.Event;
+import dev.gustavo.passin.entity.Organizer;
 import dev.gustavo.passin.exception.EventIsFullException;
 import dev.gustavo.passin.exception.EventNotFoundException;
 import dev.gustavo.passin.controller.dto.attendee.AttendeeRegistrationRequestDTO;
@@ -28,14 +29,16 @@ public class EventService {
     public EventListResponseDTO getEvents() {
         List<EventResponseItemDTO> events = eventRepository.findAll()
                 .stream()
-                .map(event -> new EventResponseItemDTO(
-                        event.getId(),
-                        event.getTitle(),
-                        event.getDetails(),
-                        event.getSlug(),
-                        event.getMaximumAttendees(),
-                        attendeeService.countAttendeesFromEvent(event.getId()),
-                        checkInService.countCheckInsFromEvent(event.getId())))
+                .map(this::toResponseItem)
+                .toList();
+
+        return new EventListResponseDTO(events);
+    }
+
+    public EventListResponseDTO getEventsByOrganizer(String organizerId) {
+        List<EventResponseItemDTO> events = eventRepository.findAllByOrganizerId(organizerId)
+                .stream()
+                .map(this::toResponseItem)
                 .toList();
 
         return new EventListResponseDTO(events);
@@ -63,6 +66,17 @@ public class EventService {
         event.setDetails(eventRequestDTO.details());
         event.setSlug(generateSlug(eventRequestDTO.title()));
         event.setMaximumAttendees(eventRequestDTO.maximumAttendees());
+        eventRepository.save(event);
+        return event.getId();
+    }
+
+    public String createEventForOrganizer(EventCreateRequestDTO eventRequestDTO, Organizer organizer) {
+        Event event = new Event();
+        event.setTitle(eventRequestDTO.title());
+        event.setDetails(eventRequestDTO.details());
+        event.setSlug(generateSlug(eventRequestDTO.title()));
+        event.setMaximumAttendees(eventRequestDTO.maximumAttendees());
+        event.setOrganizer(organizer);
         eventRepository.save(event);
         return event.getId();
     }
@@ -97,4 +111,19 @@ public class EventService {
                 .orElseThrow(() -> new EventNotFoundException("Event with id " + eventId + " was not found"));
     }
 
+    public Event getEventByIdAndOrganizer(String eventId, String organizerId) {
+        return eventRepository.findByIdAndOrganizerId(eventId, organizerId)
+                .orElseThrow(() -> new EventNotFoundException("Event with id " + eventId + " was not found"));
+    }
+
+    private EventResponseItemDTO toResponseItem(Event event) {
+        return new EventResponseItemDTO(
+                event.getId(),
+                event.getTitle(),
+                event.getDetails(),
+                event.getSlug(),
+                event.getMaximumAttendees(),
+                attendeeService.countAttendeesFromEvent(event.getId()),
+                checkInService.countCheckInsFromEvent(event.getId()));
+    }
 }
