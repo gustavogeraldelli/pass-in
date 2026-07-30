@@ -4,8 +4,8 @@ import dev.gustavo.passin.entity.Attendee;
 import dev.gustavo.passin.entity.Event;
 import dev.gustavo.passin.exception.EventIsFullException;
 import dev.gustavo.passin.exception.EventNotFoundException;
-import dev.gustavo.passin.controller.dto.attendee.AttendeeRequestDTO;
-import dev.gustavo.passin.controller.dto.event.EventRequestDTO;
+import dev.gustavo.passin.controller.dto.attendee.AttendeeRegistrationRequestDTO;
+import dev.gustavo.passin.controller.dto.event.EventCreateRequestDTO;
 import dev.gustavo.passin.repository.EventRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -47,7 +47,7 @@ class EventServiceTest {
             return event;
         });
 
-        String eventId = eventService.createEvent(new EventRequestDTO(
+        String eventId = eventService.createEvent(new EventCreateRequestDTO(
                 "Sao Paulo Dev Week",
                 "Backend and frontend event",
                 100));
@@ -81,7 +81,7 @@ class EventServiceTest {
 
         assertThatThrownBy(() -> eventService.registerAttendeeOnEvent(
                 "event-1",
-                new AttendeeRequestDTO("Ana", "ana@example.com")))
+                new AttendeeRegistrationRequestDTO("Ana", "ana@example.com")))
                 .isInstanceOf(EventIsFullException.class)
                 .hasMessage("Event is full");
 
@@ -103,7 +103,7 @@ class EventServiceTest {
 
         String attendeeId = eventService.registerAttendeeOnEvent(
                 "event-1",
-                new AttendeeRequestDTO("Ana", "ana@example.com"));
+                new AttendeeRegistrationRequestDTO("Ana", "ana@example.com"));
 
         ArgumentCaptor<Attendee> attendeeCaptor = ArgumentCaptor.forClass(Attendee.class);
         verify(attendeeService).registerAttendee(attendeeCaptor.capture());

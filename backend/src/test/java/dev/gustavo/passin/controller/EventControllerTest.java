@@ -2,8 +2,8 @@ package dev.gustavo.passin.controller;
 
 import dev.gustavo.passin.controller.dto.attendee.AttendeeListResponseDTO;
 import dev.gustavo.passin.controller.dto.event.EventListResponseDTO;
-import dev.gustavo.passin.controller.dto.event.EventResponseDTO;
-import dev.gustavo.passin.entity.Event;
+import dev.gustavo.passin.controller.dto.event.EventDetailsResponseDTO;
+import dev.gustavo.passin.controller.dto.event.EventResponseItemDTO;
 import dev.gustavo.passin.exception.AttendeeAlreadyExistsException;
 import dev.gustavo.passin.exception.EventNotFoundException;
 import dev.gustavo.passin.service.AttendeeService;
@@ -84,7 +84,10 @@ class EventControllerTest {
                 .andExpect(jsonPath("$.message").value("Request validation failed"))
                 .andExpect(jsonPath("$.fields[*].field", hasItem("title")))
                 .andExpect(jsonPath("$.fields[*].field", hasItem("details")))
-                .andExpect(jsonPath("$.fields[*].field", hasItem("maximumAttendees")));
+                .andExpect(jsonPath("$.fields[*].field", hasItem("maximumAttendees")))
+                .andExpect(jsonPath("$.fields[*].message", hasItem("Title is required")))
+                .andExpect(jsonPath("$.fields[*].message", hasItem("Details are required")))
+                .andExpect(jsonPath("$.fields[*].message", hasItem("Maximum attendees must be greater than zero")));
     }
 
     @Test
@@ -139,23 +142,40 @@ class EventControllerTest {
     }
 
     @Test
+    void shouldReturnBadRequestWhenRegisteringAttendeeWithInvalidPayload() throws Exception {
+        mockMvc.perform(post("/events/event-1/attendees")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "name": "",
+                                  "email": "invalid-email"
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Request validation failed"))
+                .andExpect(jsonPath("$.fields[*].field", hasItem("name")))
+                .andExpect(jsonPath("$.fields[*].field", hasItem("email")))
+                .andExpect(jsonPath("$.fields[*].message", hasItem("Name is required")))
+                .andExpect(jsonPath("$.fields[*].message", hasItem("Email must be valid")));
+    }
+
+    @Test
     void shouldReturnEventDetails() throws Exception {
-        when(eventService.getEvent("event-1")).thenReturn(new EventResponseDTO(event(), 3, 2));
+        EventResponseItemDTO event = new EventResponseItemDTO(
+                "event-1",
+                "Java Conf",
+                "Backend event",
+                "java-conf",
+                100,
+                3,
+                2);
+
+        when(eventService.getEvent("event-1")).thenReturn(new EventDetailsResponseDTO(event));
 
         mockMvc.perform(get("/events/event-1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.event.id").value("event-1"))
                 .andExpect(jsonPath("$.event.numberOfAttendees").value(3))
                 .andExpect(jsonPath("$.event.numberOfCheckIns").value(2));
-    }
-
-    private Event event() {
-        Event event = new Event();
-        event.setId("event-1");
-        event.setTitle("Java Conf");
-        event.setDetails("Backend event");
-        event.setSlug("java-conf");
-        event.setMaximumAttendees(100);
-        return event;
     }
 }

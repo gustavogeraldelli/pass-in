@@ -4,7 +4,7 @@ import dev.gustavo.passin.entity.Attendee;
 import dev.gustavo.passin.exception.AttendeeAlreadyExistsException;
 import dev.gustavo.passin.exception.AttendeeNotFoundException;
 import dev.gustavo.passin.entity.CheckIn;
-import dev.gustavo.passin.controller.dto.attendee.AttendeeDTO;
+import dev.gustavo.passin.controller.dto.attendee.AttendeeResponseItemDTO;
 import dev.gustavo.passin.controller.dto.attendee.AttendeeListResponseDTO;
 import dev.gustavo.passin.controller.dto.attendee.AttendeeBadgeResponseDTO;
 import dev.gustavo.passin.repository.AttendeeRepository;
@@ -37,7 +37,7 @@ public class AttendeeService {
     public AttendeeListResponseDTO getEventsAttendee(String eventId, String query, Pageable pageable) {
         String normalizedQuery = query == null || query.isBlank() ? null : query.trim();
         Page<Attendee> attendeePage = attendeeRepository.findByEventIdAndQuery(eventId, normalizedQuery, pageable);
-        List<AttendeeDTO> attendees = attendeePage.stream().map(this::toDTO).toList();
+        List<AttendeeResponseItemDTO> attendees = attendeePage.stream().map(this::toResponseItem).toList();
 
         return new AttendeeListResponseDTO(
                 attendees,
@@ -83,11 +83,11 @@ public class AttendeeService {
         return attendeeRepository.findById(attendeeId).orElseThrow(() -> new AttendeeNotFoundException("Attendee with id " + attendeeId + " was not found"));
     }
 
-    private AttendeeDTO toDTO(Attendee attendee) {
+    private AttendeeResponseItemDTO toResponseItem(Attendee attendee) {
         Optional<CheckIn> checkIn = checkInService.getCheckIn(attendee.getId());
         LocalDateTime checkedInAt = checkIn.map(CheckIn::getCreatedAt).orElse(null);
 
-        return new AttendeeDTO(
+        return new AttendeeResponseItemDTO(
                 attendee.getId(),
                 attendee.getName(),
                 attendee.getEmail(),

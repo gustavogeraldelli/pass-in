@@ -1,10 +1,10 @@
 package dev.gustavo.passin.controller;
 
 import dev.gustavo.passin.controller.dto.attendee.AttendeeListResponseDTO;
-import dev.gustavo.passin.controller.dto.attendee.AttendeeRequestDTO;
+import dev.gustavo.passin.controller.dto.attendee.AttendeeRegistrationRequestDTO;
 import dev.gustavo.passin.controller.dto.event.EventListResponseDTO;
-import dev.gustavo.passin.controller.dto.event.EventRequestDTO;
-import dev.gustavo.passin.controller.dto.event.EventResponseDTO;
+import dev.gustavo.passin.controller.dto.event.EventCreateRequestDTO;
+import dev.gustavo.passin.controller.dto.event.EventDetailsResponseDTO;
 import dev.gustavo.passin.service.AttendeeService;
 import dev.gustavo.passin.service.EventService;
 import jakarta.validation.Valid;
@@ -30,13 +30,13 @@ public class EventController {
     }
 
     @GetMapping("/{eventId}")
-    public ResponseEntity<EventResponseDTO> getEvent(@PathVariable String eventId) {
-        EventResponseDTO event = eventService.getEvent(eventId);
+    public ResponseEntity<EventDetailsResponseDTO> getEvent(@PathVariable String eventId) {
+        EventDetailsResponseDTO event = eventService.getEvent(eventId);
         return ResponseEntity.ok(event);
     }
 
     @PostMapping
-    public ResponseEntity<String> addEvent(@RequestBody @Valid EventRequestDTO event, UriComponentsBuilder uriComponentsBuilder) {
+    public ResponseEntity<String> addEvent(@RequestBody @Valid EventCreateRequestDTO event, UriComponentsBuilder uriComponentsBuilder) {
         String id = eventService.createEvent(event);
         var uri = uriComponentsBuilder.path("/events/{id}").buildAndExpand(id).toUri();
         return ResponseEntity.created(uri).body(id);
@@ -54,7 +54,7 @@ public class EventController {
     }
 
     @PostMapping("/{eventId}/attendees")
-    public ResponseEntity<String> registerAttendee(@PathVariable String eventId, @RequestBody @Valid AttendeeRequestDTO attendee, UriComponentsBuilder uriComponentsBuilder) {
+    public ResponseEntity<String> registerAttendee(@PathVariable String eventId, @RequestBody @Valid AttendeeRegistrationRequestDTO attendee, UriComponentsBuilder uriComponentsBuilder) {
         String attendeeId = eventService.registerAttendeeOnEvent(eventId, attendee);
         var uri = uriComponentsBuilder.path("/attendees/{attendeeId}/badge").buildAndExpand(attendeeId).toUri();
         return ResponseEntity.created(uri).body(attendeeId);

@@ -4,11 +4,11 @@ import dev.gustavo.passin.entity.Attendee;
 import dev.gustavo.passin.entity.Event;
 import dev.gustavo.passin.exception.EventIsFullException;
 import dev.gustavo.passin.exception.EventNotFoundException;
-import dev.gustavo.passin.controller.dto.attendee.AttendeeRequestDTO;
-import dev.gustavo.passin.controller.dto.event.EventDTO;
+import dev.gustavo.passin.controller.dto.attendee.AttendeeRegistrationRequestDTO;
+import dev.gustavo.passin.controller.dto.event.EventResponseItemDTO;
 import dev.gustavo.passin.controller.dto.event.EventListResponseDTO;
-import dev.gustavo.passin.controller.dto.event.EventRequestDTO;
-import dev.gustavo.passin.controller.dto.event.EventResponseDTO;
+import dev.gustavo.passin.controller.dto.event.EventCreateRequestDTO;
+import dev.gustavo.passin.controller.dto.event.EventDetailsResponseDTO;
 import dev.gustavo.passin.repository.EventRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,9 +26,9 @@ public class EventService {
     private final CheckInService checkInService;
 
     public EventListResponseDTO getEvents() {
-        List<EventDTO> events = eventRepository.findAll()
+        List<EventResponseItemDTO> events = eventRepository.findAll()
                 .stream()
-                .map(event -> new EventDTO(
+                .map(event -> new EventResponseItemDTO(
                         event.getId(),
                         event.getTitle(),
                         event.getDetails(),
@@ -41,14 +41,23 @@ public class EventService {
         return new EventListResponseDTO(events);
     }
 
-    public EventResponseDTO getEvent(String eventId) {
+    public EventDetailsResponseDTO getEvent(String eventId) {
         Event event = getEventById(eventId);
         Integer attendeeCount = attendeeService.countAttendeesFromEvent(eventId);
         Integer checkInCount = checkInService.countCheckInsFromEvent(eventId);
-        return new EventResponseDTO(event, attendeeCount, checkInCount);
+        EventResponseItemDTO responseItem = new EventResponseItemDTO(
+                event.getId(),
+                event.getTitle(),
+                event.getDetails(),
+                event.getSlug(),
+                event.getMaximumAttendees(),
+                attendeeCount,
+                checkInCount);
+
+        return new EventDetailsResponseDTO(responseItem);
     }
 
-    public String createEvent(EventRequestDTO eventRequestDTO) {
+    public String createEvent(EventCreateRequestDTO eventRequestDTO) {
         Event event = new Event();
         event.setTitle(eventRequestDTO.title());
         event.setDetails(eventRequestDTO.details());
@@ -58,7 +67,7 @@ public class EventService {
         return event.getId();
     }
 
-    public String registerAttendeeOnEvent(String eventId, AttendeeRequestDTO attendeeRequestDTO) {
+    public String registerAttendeeOnEvent(String eventId, AttendeeRegistrationRequestDTO attendeeRequestDTO) {
         attendeeService.verifyAttendeeSubscription(attendeeRequestDTO.email(), eventId);
         Event event = getEventById(eventId);
         List<Attendee> attendeeList = attendeeService.getAllAttendeesFromEvent(eventId);
