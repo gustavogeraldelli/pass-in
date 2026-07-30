@@ -6,10 +6,13 @@ import dev.gustavo.passin.controller.dto.event.EventDetailsResponseDTO;
 import dev.gustavo.passin.controller.dto.event.EventResponseItemDTO;
 import dev.gustavo.passin.exception.AttendeeAlreadyExistsException;
 import dev.gustavo.passin.exception.EventNotFoundException;
+import dev.gustavo.passin.repository.OrganizerRepository;
+import dev.gustavo.passin.security.JwtService;
 import dev.gustavo.passin.service.AttendeeService;
 import dev.gustavo.passin.service.EventService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
@@ -32,6 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(EventController.class)
+@AutoConfigureMockMvc(addFilters = false)
 class EventControllerTest {
 
     @Autowired
@@ -42,6 +46,12 @@ class EventControllerTest {
 
     @MockitoBean
     private AttendeeService attendeeService;
+
+    @MockitoBean
+    private OrganizerRepository organizerRepository;
+
+    @MockitoBean
+    private JwtService jwtService;
 
     @Test
     void shouldReturnEvents() throws Exception {

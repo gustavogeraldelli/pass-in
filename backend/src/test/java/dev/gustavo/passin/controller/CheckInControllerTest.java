@@ -2,9 +2,12 @@ package dev.gustavo.passin.controller;
 
 import dev.gustavo.passin.exception.AttendeeAlreadyCheckedInException;
 import dev.gustavo.passin.exception.InvalidCheckInTokenException;
+import dev.gustavo.passin.repository.OrganizerRepository;
+import dev.gustavo.passin.security.JwtService;
 import dev.gustavo.passin.service.AttendeeService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -16,6 +19,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(CheckInController.class)
+@AutoConfigureMockMvc(addFilters = false)
 class CheckInControllerTest {
 
     @Autowired
@@ -23,6 +27,12 @@ class CheckInControllerTest {
 
     @MockitoBean
     private AttendeeService attendeeService;
+
+    @MockitoBean
+    private OrganizerRepository organizerRepository;
+
+    @MockitoBean
+    private JwtService jwtService;
 
     @Test
     void shouldCheckInByToken() throws Exception {

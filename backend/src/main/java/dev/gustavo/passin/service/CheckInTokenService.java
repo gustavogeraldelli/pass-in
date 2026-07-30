@@ -27,8 +27,8 @@ public class CheckInTokenService {
     private final Clock clock;
 
     @Autowired
-    public CheckInTokenService(@Value("${app.check-in.token-secret:pass-in-dev-secret}") String secret,
-                               @Value("${app.check-in.token-ttl:PT24H}") Duration ttl) {
+    public CheckInTokenService(@Value("${app.check-in.token-secret}") String secret,
+                               @Value("${app.check-in.token-ttl}") Duration ttl) {
         this(secret, ttl, Clock.systemUTC());
     }
 
@@ -47,27 +47,23 @@ public class CheckInTokenService {
 
     public String getAttendeeId(String token) {
         String[] tokenParts = token.split("\\.", -1);
-        if (tokenParts.length != 2 || tokenParts[0].isBlank() || tokenParts[1].isBlank()) {
+        if (tokenParts.length != 2 || tokenParts[0].isBlank() || tokenParts[1].isBlank())
             throw new InvalidCheckInTokenException("Invalid check-in token");
-        }
 
         String encodedPayload = tokenParts[0];
         String signature = tokenParts[1];
 
-        if (!MessageDigest.isEqual(signature.getBytes(StandardCharsets.UTF_8), sign(encodedPayload).getBytes(StandardCharsets.UTF_8))) {
+        if (!MessageDigest.isEqual(signature.getBytes(StandardCharsets.UTF_8), sign(encodedPayload).getBytes(StandardCharsets.UTF_8)))
             throw new InvalidCheckInTokenException("Invalid check-in token");
-        }
 
         String payload = decode(encodedPayload);
         String[] payloadParts = payload.split(PAYLOAD_SEPARATOR, -1);
-        if (payloadParts.length != 2 || payloadParts[0].isBlank() || payloadParts[1].isBlank()) {
+        if (payloadParts.length != 2 || payloadParts[0].isBlank() || payloadParts[1].isBlank())
             throw new InvalidCheckInTokenException("Invalid check-in token");
-        }
 
         long expiresAt = parseExpiration(payloadParts[1]);
-        if (Instant.now(clock).isAfter(Instant.ofEpochSecond(expiresAt))) {
+        if (Instant.now(clock).isAfter(Instant.ofEpochSecond(expiresAt)))
             throw new InvalidCheckInTokenException("Expired check-in token");
-        }
 
         return payloadParts[0];
     }
@@ -75,7 +71,8 @@ public class CheckInTokenService {
     private long parseExpiration(String value) {
         try {
             return Long.parseLong(value);
-        } catch (NumberFormatException exception) {
+        }
+        catch (NumberFormatException exception) {
             throw new InvalidCheckInTokenException("Invalid check-in token");
         }
     }
@@ -85,7 +82,8 @@ public class CheckInTokenService {
             Mac mac = Mac.getInstance(HMAC_ALGORITHM);
             mac.init(new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), HMAC_ALGORITHM));
             return HexFormat.of().formatHex(mac.doFinal(value.getBytes(StandardCharsets.UTF_8)));
-        } catch (Exception exception) {
+        }
+        catch (Exception exception) {
             throw new IllegalStateException("Could not sign check-in token", exception);
         }
     }
@@ -97,7 +95,8 @@ public class CheckInTokenService {
     private String decode(String value) {
         try {
             return new String(Base64.getUrlDecoder().decode(value), StandardCharsets.UTF_8);
-        } catch (IllegalArgumentException exception) {
+        }
+        catch (IllegalArgumentException exception) {
             throw new InvalidCheckInTokenException("Invalid check-in token");
         }
     }
