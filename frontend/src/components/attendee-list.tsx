@@ -18,10 +18,10 @@ const PAGE_SIZE = 10
 
 interface AttendeeListProps {
     eventId: string
-    accessToken: string
+    authenticatedRequest: <T>(request: (accessToken: string) => Promise<T>) => Promise<T>
 }
 
-export function AttendeeList({ eventId, accessToken }: AttendeeListProps) {
+export function AttendeeList({ eventId, authenticatedRequest }: AttendeeListProps) {
     const [searchParams, setSearchParams] = useSearchParams()
     const [page, setPage] = useState(() => {
         return Number(searchParams.get('page') ?? 0)
@@ -37,7 +37,7 @@ export function AttendeeList({ eventId, accessToken }: AttendeeListProps) {
     const currentPageSize = attendees.length
 
     useEffect(() => {
-        getEventAttendees(eventId, page, PAGE_SIZE, query, accessToken)
+        authenticatedRequest((accessToken) => getEventAttendees(eventId, page, PAGE_SIZE, query, accessToken))
             .then((data) => {
                 setAttendees(data.attendees)
                 setTotalElements(data.totalElements)
@@ -51,7 +51,7 @@ export function AttendeeList({ eventId, accessToken }: AttendeeListProps) {
                 setError(getFriendlyErrorMessage(error, 'Nao foi possivel carregar os participantes.'))
             })
             .finally(() => setIsLoading(false))
-    }, [accessToken, eventId, page, query])
+    }, [authenticatedRequest, eventId, page, query])
 
     function setCurrentPage(page: number) {
         const nextParams = new URLSearchParams()

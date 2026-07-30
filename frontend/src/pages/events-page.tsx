@@ -11,7 +11,7 @@ import { useAuth } from '../lib/use-auth'
 
 export function EventsPage() {
     const navigate = useNavigate()
-    const { accessToken } = useAuth()
+    const { authenticatedRequest } = useAuth()
     const [events, setEvents] = useState<Event[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
@@ -22,34 +22,25 @@ export function EventsPage() {
     const [isCreating, setIsCreating] = useState(false)
 
     useEffect(() => {
-        if (!accessToken)
-            return
-
-        getOrganizerEvents(accessToken)
+        authenticatedRequest(getOrganizerEvents)
             .then((data) => {
                 setEvents(data.events)
                 setError(null)
             })
             .catch((error: Error) => setError(getFriendlyErrorMessage(error, 'Nao foi possivel carregar os eventos.')))
             .finally(() => setIsLoading(false))
-    }, [accessToken])
+    }, [authenticatedRequest])
 
     function handleCreateEvent(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
         setIsCreating(true)
         setCreationError(null)
 
-        if (!accessToken) {
-            setCreationError('Sessao expirada. Entre novamente.')
-            setIsCreating(false)
-            return
-        }
-
-        createEvent({
+        authenticatedRequest((accessToken) => createEvent({
             title,
             details,
             maximumAttendees: Number(maximumAttendees),
-        }, accessToken)
+        }, accessToken))
             .then((eventId) => navigate(`/events/${eventId}/attendees`))
             .catch((error: Error) => setCreationError(getFriendlyErrorMessage(error, 'Nao foi possivel criar o evento.')))
             .finally(() => setIsCreating(false))

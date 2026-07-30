@@ -4,17 +4,21 @@
 
 Fullstack event check-in platform with React, TypeScript, Spring Boot, PostgreSQL, QR code badges, Docker, OpenAPI, and tests.
 
-The project was originally based on Rocketseat's NLW event and was expanded with real persistence, backend validation, a navigable frontend flow, QR code check-ins, Docker setup, CI, and business-rule tests.
+The project was originally based on Rocketseat's NLW event and was expanded with organizer authentication, real persistence, backend validation, a navigable frontend flow, QR code check-ins, Docker setup, CI, and business-rule tests.
 
 ## Features
 
 - Event creation, listing, and details
+- Organizer registration and login
+- Protected organizer event management
 - Attendee registration per event
 - Capacity validation for full events
 - Duplicate registration prevention by event and email
 - Attendee search and backend pagination
 - Attendee badge page with QR code
 - Check-in flow with duplicate check-in prevention
+- Access tokens and refresh token rotation
+- Automatic session refresh for protected frontend requests
 - Event dashboard with seats, attendees, check-ins, and remaining capacity
 - Standardized API errors and DTO validation
 - OpenAPI/Swagger documentation
@@ -43,7 +47,7 @@ backend/   Spring Boot REST API with JPA, Flyway migrations, OpenAPI, and tests
 postgres   PostgreSQL database managed by Docker Compose
 ```
 
-The frontend consumes the Spring Boot API through `VITE_API_BASE_URL`. The backend reads database and CORS configuration from environment variables.
+The frontend consumes the Spring Boot API through `VITE_API_BASE_URL`. The backend reads database, CORS, check-in token, and auth token configuration from environment variables.
 
 ## Interface
 
@@ -124,6 +128,8 @@ FRONTEND_ORIGIN=http://localhost:9090
 VITE_API_BASE_URL=http://localhost:8080
 CHECK_IN_TOKEN_SECRET=change-me
 CHECK_IN_TOKEN_TTL=PT24H
+JWT_SECRET=change-me
+ACCESS_TOKEN_TTL=PT15M
 REFRESH_TOKEN_TTL=P7D
 ```
 
@@ -135,16 +141,25 @@ VITE_API_BASE_URL=http://localhost:8080
 
 ## API
 
-Main endpoints:
+Public endpoints:
+
+```text
+POST /auth/register
+POST /auth/login
+POST /auth/refresh
+POST /auth/logout
+GET  /events/{eventId}
+POST /events/{eventId}/attendees
+GET  /attendees/{attendeeId}/badge
+POST /check-ins/{token}
+```
+
+Protected endpoints:
 
 ```text
 GET  /events
 POST /events
-GET  /events/{eventId}
 GET  /events/{eventId}/attendees?page=0&size=10&query=
-POST /events/{eventId}/attendees
-GET  /attendees/{attendeeId}/badge
-POST /check-ins/{token}
 ```
 
 Swagger UI:
@@ -183,10 +198,6 @@ docker compose build
 - Backend pagination/search avoids loading all attendees into the browser.
 - The frontend uses React Router instead of hardcoded event state.
 - QR code badges use signed check-in tokens.
-- Backend tests cover event capacity, duplicate registration, badge generation, signed check-in tokens, HTTP status codes, and standardized error responses.
-
-## Limitations
-
-- There is no authentication or organizer role yet.
-- Email delivery is not implemented.
-- The dashboard is intentionally simple and focused on the event workflow.
+- Organizer-owned event management keeps attendee registration and check-in public while protecting the administrative flow.
+- Protected frontend requests retry once after refreshing the access token.
+- Backend tests cover authentication, event ownership, event capacity, duplicate registration, badge generation, signed check-in tokens, HTTP status codes, and standardized error responses.

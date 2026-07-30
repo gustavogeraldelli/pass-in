@@ -6,6 +6,7 @@ export type AuthContextValue = {
     refreshToken: string | null
     isAuthenticated: boolean
     saveTokens: (tokens: AuthTokens) => void
+    authenticatedRequest: <T>(request: (accessToken: string) => Promise<T>) => Promise<T>
     logout: () => void
 }
 

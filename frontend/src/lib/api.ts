@@ -50,6 +50,17 @@ export interface ApiError {
     }>
 }
 
+export class ApiRequestError extends Error {
+    status: number
+    fields?: ApiError['fields']
+
+    constructor(status: number, error: ApiError) {
+        super(error.message || `Request failed with status ${status}`)
+        this.status = status
+        this.fields = error.fields
+    }
+}
+
 export interface AuthTokens {
     accessToken: string
     refreshToken: string
@@ -71,7 +82,7 @@ async function request<T>(path: string, init?: RequestInit, accessToken?: string
 
     if (!response.ok) {
         const error = await readError(response)
-        throw new Error(error.message || `Request failed with status ${response.status}`)
+        throw new ApiRequestError(response.status, error)
     }
 
     if (response.status === 204) {
@@ -168,5 +179,15 @@ export function loginOrganizer(credentials: { email: string, password: string })
             'Content-Type': 'application/json',
         },
         body: JSON.stringify(credentials),
+    })
+}
+
+export function refreshOrganizer(refreshToken: string) {
+    return request<AuthTokens>('/auth/refresh', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ refreshToken }),
     })
 }

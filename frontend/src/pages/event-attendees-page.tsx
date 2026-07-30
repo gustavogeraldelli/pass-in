@@ -10,7 +10,7 @@ import { useAuth } from '../lib/use-auth'
 
 export function EventAttendeesPage() {
     const { eventId } = useParams()
-    const { accessToken } = useAuth()
+    const { authenticatedRequest, isAuthenticated } = useAuth()
     const [event, setEvent] = useState<Event | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
@@ -31,7 +31,7 @@ export function EventAttendeesPage() {
     if (!eventId)
         return <Navigate to="/events" replace />
 
-    if (!accessToken)
+    if (!isAuthenticated)
         return <Navigate to="/login" replace />
 
     const remainingSeats = event ? Math.max(event.maximumAttendees - event.numberOfAttendees, 0) : 0
@@ -118,7 +118,7 @@ export function EventAttendeesPage() {
                 </div>
             )}
 
-            <AttendeeList eventId={eventId} accessToken={accessToken} />
+            <AttendeeList eventId={eventId} authenticatedRequest={authenticatedRequest} />
         </main>
     )
 }
