@@ -1,8 +1,10 @@
 # pass.in
 
+[![CI](https://github.com/gustavogeraldelli/pass-in/actions/workflows/ci.yml/badge.svg)](https://github.com/gustavogeraldelli/pass-in/actions/workflows/ci.yml)
+
 Fullstack event check-in platform with React, TypeScript, Spring Boot, PostgreSQL, QR code badges, Docker, OpenAPI, and tests.
 
-The project was originally based on Rocketseat's NLW event and was extended into a portfolio-oriented fullstack application with real persistence, backend validation, a navigable frontend flow, QR code check-ins, Docker setup, CI, and business-rule tests.
+The project was originally based on Rocketseat's NLW event and was expanded with real persistence, backend validation, a navigable frontend flow, QR code check-ins, Docker setup, CI, and business-rule tests.
 
 ## Features
 
@@ -17,7 +19,7 @@ The project was originally based on Rocketseat's NLW event and was extended into
 - Standardized API errors and DTO validation
 - OpenAPI/Swagger documentation
 - Docker Compose setup for PostgreSQL, backend, and frontend
-- Backend unit tests and GitHub Actions CI
+- Backend unit/controller tests and GitHub Actions CI
 
 ## Stack
 
@@ -180,7 +182,7 @@ docker compose build
 - Backend pagination/search avoids loading all attendees into the browser.
 - The frontend uses React Router instead of hardcoded event state.
 - QR code badges use signed check-in tokens.
-- Backend unit tests cover event capacity, duplicate registration, badge generation, and duplicate check-ins.
+- Backend tests cover event capacity, duplicate registration, badge generation, signed check-in tokens, HTTP status codes, and standardized error responses.
 
 ## Limitations
 
