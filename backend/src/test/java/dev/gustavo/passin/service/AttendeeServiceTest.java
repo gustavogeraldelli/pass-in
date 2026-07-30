@@ -83,6 +83,25 @@ class AttendeeServiceTest {
     }
 
     @Test
+    void shouldReturnPaginatedAttendeesWithoutSearchQuery() {
+        Event event = event("event-1");
+        Attendee attendee = attendee("attendee-1", event);
+
+        PageRequest pageable = PageRequest.of(0, 10);
+        when(attendeeRepository.findByEventId("event-1", pageable))
+                .thenReturn(new PageImpl<>(List.of(attendee), pageable, 1));
+        when(checkInService.getCheckIn("attendee-1")).thenReturn(Optional.empty());
+
+        AttendeeListResponseDTO response = attendeeService.getEventsAttendee("event-1", " ", pageable);
+
+        assertThat(response.page()).isZero();
+        assertThat(response.size()).isEqualTo(10);
+        assertThat(response.totalElements()).isEqualTo(1);
+        assertThat(response.attendees()).hasSize(1);
+        assertThat(response.attendees().getFirst().checkInAt()).isNull();
+    }
+
+    @Test
     void shouldReturnAttendeeBadge() {
         Event event = event("event-1");
         Attendee attendee = attendee("attendee-1", event);

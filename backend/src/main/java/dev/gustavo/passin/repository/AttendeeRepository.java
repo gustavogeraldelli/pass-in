@@ -11,6 +11,7 @@ import java.util.Optional;
 
 public interface AttendeeRepository extends JpaRepository<Attendee, String> {
     List<Attendee> findByEventId(String eventId);
+    Page<Attendee> findByEventId(String eventId, Pageable pageable);
     Optional<Attendee> findByEventIdAndEmail(String eventId, String email);
     Long countByEventId(String eventId);
 

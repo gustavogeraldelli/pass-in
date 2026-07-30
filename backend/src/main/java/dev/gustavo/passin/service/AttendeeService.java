@@ -36,7 +36,9 @@ public class AttendeeService {
 
     public AttendeeListResponseDTO getEventsAttendee(String eventId, String query, Pageable pageable) {
         String normalizedQuery = query == null || query.isBlank() ? null : query.trim();
-        Page<Attendee> attendeePage = attendeeRepository.findByEventIdAndQuery(eventId, normalizedQuery, pageable);
+        Page<Attendee> attendeePage = normalizedQuery == null
+                ? attendeeRepository.findByEventId(eventId, pageable)
+                : attendeeRepository.findByEventIdAndQuery(eventId, normalizedQuery, pageable);
         List<AttendeeResponseItemDTO> attendees = attendeePage.stream().map(this::toResponseItem).toList();
 
         return new AttendeeListResponseDTO(

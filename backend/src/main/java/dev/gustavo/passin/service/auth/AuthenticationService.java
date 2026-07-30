@@ -50,6 +50,7 @@ public class AuthenticationService {
         return createTokens(organizer);
     }
 
+    @Transactional
     public AuthenticationTokens refresh(String refreshToken) {
         RefreshTokenResult refreshTokenResult = refreshTokenService.rotate(refreshToken);
         Organizer organizer = refreshTokenResult.organizer();
