@@ -26,15 +26,6 @@ public class EventService {
     private final AttendeeService attendeeService;
     private final CheckInService checkInService;
 
-    public EventListResponseDTO getEvents() {
-        List<EventResponseItemDTO> events = eventRepository.findAll()
-                .stream()
-                .map(this::toResponseItem)
-                .toList();
-
-        return new EventListResponseDTO(events);
-    }
-
     public EventListResponseDTO getEventsByOrganizer(String organizerId) {
         List<EventResponseItemDTO> events = eventRepository.findAllByOrganizerId(organizerId)
                 .stream()
@@ -58,16 +49,6 @@ public class EventService {
                 checkInCount);
 
         return new EventDetailsResponseDTO(responseItem);
-    }
-
-    public String createEvent(EventCreateRequestDTO eventRequestDTO) {
-        Event event = new Event();
-        event.setTitle(eventRequestDTO.title());
-        event.setDetails(eventRequestDTO.details());
-        event.setSlug(generateSlug(eventRequestDTO.title()));
-        event.setMaximumAttendees(eventRequestDTO.maximumAttendees());
-        eventRepository.save(event);
-        return event.getId();
     }
 
     public String createEventForOrganizer(EventCreateRequestDTO eventRequestDTO, Organizer organizer) {

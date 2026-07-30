@@ -41,30 +41,7 @@ class EventServiceTest {
     private EventService eventService;
 
     @Test
-    void shouldCreateEventWithGeneratedSlug() {
-        when(eventRepository.save(any(Event.class))).thenAnswer(invocation -> {
-            Event event = invocation.getArgument(0);
-            event.setId("event-1");
-            return event;
-        });
-
-        String eventId = eventService.createEvent(new EventCreateRequestDTO(
-                "Sao Paulo Dev Week",
-                "Backend and frontend event",
-                100));
-
-        ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
-        verify(eventRepository).save(eventCaptor.capture());
-        Event savedEvent = eventCaptor.getValue();
-
-        assertThat(eventId).isEqualTo("event-1");
-        assertThat(savedEvent.getTitle()).isEqualTo("Sao Paulo Dev Week");
-        assertThat(savedEvent.getSlug()).isEqualTo("sao-paulo-dev-week");
-        assertThat(savedEvent.getMaximumAttendees()).isEqualTo(100);
-    }
-
-    @Test
-    void shouldCreateEventForOrganizer() {
+    void shouldCreateEventForOrganizerWithGeneratedSlug() {
         Organizer organizer = organizer("organizer-1");
         when(eventRepository.save(any(Event.class))).thenAnswer(invocation -> {
             Event event = invocation.getArgument(0);
@@ -82,6 +59,9 @@ class EventServiceTest {
         Event savedEvent = eventCaptor.getValue();
 
         assertThat(eventId).isEqualTo("event-1");
+        assertThat(savedEvent.getTitle()).isEqualTo("Java Conf");
+        assertThat(savedEvent.getSlug()).isEqualTo("java-conf");
+        assertThat(savedEvent.getMaximumAttendees()).isEqualTo(100);
         assertThat(savedEvent.getOrganizer()).isEqualTo(organizer);
     }
 

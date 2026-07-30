@@ -4,18 +4,27 @@ import dev.gustavo.passin.controller.dto.attendee.AttendeeListResponseDTO;
 import dev.gustavo.passin.controller.dto.event.EventListResponseDTO;
 import dev.gustavo.passin.controller.dto.event.EventDetailsResponseDTO;
 import dev.gustavo.passin.controller.dto.event.EventResponseItemDTO;
+import dev.gustavo.passin.config.SecurityConfig;
+import dev.gustavo.passin.entity.Organizer;
 import dev.gustavo.passin.exception.AttendeeAlreadyExistsException;
 import dev.gustavo.passin.exception.EventNotFoundException;
 import dev.gustavo.passin.repository.OrganizerRepository;
+import dev.gustavo.passin.security.ApiAuthenticationEntryPoint;
+import dev.gustavo.passin.security.OrganizerPrincipal;
 import dev.gustavo.passin.service.auth.AccessTokenService;
 import dev.gustavo.passin.service.AttendeeService;
 import dev.gustavo.passin.service.EventService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
+import org.springframework.boot.security.autoconfigure.SecurityAutoConfiguration;
+import org.springframework.boot.security.autoconfigure.web.servlet.ServletWebSecurityAutoConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -30,12 +39,15 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(EventController.class)
-@AutoConfigureMockMvc(addFilters = false)
+@AutoConfigureMockMvc
+@Import({SecurityConfig.class, ApiAuthenticationEntryPoint.class})
+@ImportAutoConfiguration({SecurityAutoConfiguration.class, ServletWebSecurityAutoConfiguration.class})
 class EventControllerTest {
 
     @Autowired
@@ -55,18 +67,22 @@ class EventControllerTest {
 
     @Test
     void shouldReturnEvents() throws Exception {
-        when(eventService.getEvents()).thenReturn(new EventListResponseDTO(List.of()));
+        when(eventService.getEventsByOrganizer("organizer-1")).thenReturn(new EventListResponseDTO(List.of()));
 
-        mockMvc.perform(get("/events"))
+        mockMvc.perform(get("/events").with(authentication(authenticationToken(organizerPrincipal()))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.events").isArray());
+
+        verify(eventService).getEventsByOrganizer("organizer-1");
     }
 
     @Test
     void shouldCreateEvent() throws Exception {
-        when(eventService.createEvent(any())).thenReturn("event-1");
+        OrganizerPrincipal organizer = organizerPrincipal();
+        when(eventService.createEventForOrganizer(any(), any())).thenReturn("event-1");
 
         mockMvc.perform(post("/events")
+                        .with(authentication(authenticationToken(organizer)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -77,11 +93,14 @@ class EventControllerTest {
                                 """))
                 .andExpect(status().isCreated())
                 .andExpect(header().string("Location", "http://localhost/events/event-1"));
+
+        verify(eventService).createEventForOrganizer(any(), eq(organizer.getOrganizer()));
     }
 
     @Test
     void shouldReturnBadRequestWhenCreatingEventWithInvalidPayload() throws Exception {
         mockMvc.perform(post("/events")
+                        .with(authentication(authenticationToken(organizerPrincipal())))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -117,6 +136,7 @@ class EventControllerTest {
                 .thenReturn(new AttendeeListResponseDTO(List.of(), 0, 100, 0L, 0));
 
         mockMvc.perform(get("/events/event-1/attendees")
+                        .with(authentication(authenticationToken(organizerPrincipal())))
                         .param("page", "-1")
                         .param("size", "200")
                         .param("query", "ana"))
@@ -128,10 +148,21 @@ class EventControllerTest {
 
         var pageableCaptor = forClass(Pageable.class);
 
-        verify(eventService).getEventById("event-1");
+        verify(eventService).getEventByIdAndOrganizer("event-1", "organizer-1");
         verify(attendeeService).getEventsAttendee(eq("event-1"), eq("ana"), pageableCaptor.capture());
         assertThat(pageableCaptor.getValue().getPageNumber()).isZero();
         assertThat(pageableCaptor.getValue().getPageSize()).isEqualTo(100);
+    }
+
+    @Test
+    void shouldReturnNotFoundWhenEventDoesNotBelongToOrganizer() throws Exception {
+        when(eventService.getEventByIdAndOrganizer("event-1", "organizer-1"))
+                .thenThrow(new EventNotFoundException("Event with id event-1 was not found"));
+
+        mockMvc.perform(get("/events/event-1/attendees")
+                        .with(authentication(authenticationToken(organizerPrincipal()))))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("Event with id event-1 was not found"));
     }
 
     @Test
@@ -187,5 +218,21 @@ class EventControllerTest {
                 .andExpect(jsonPath("$.event.id").value("event-1"))
                 .andExpect(jsonPath("$.event.numberOfAttendees").value(3))
                 .andExpect(jsonPath("$.event.numberOfCheckIns").value(2));
+    }
+
+    private OrganizerPrincipal organizerPrincipal() {
+        Organizer organizer = new Organizer();
+        organizer.setId("organizer-1");
+        organizer.setName("Gustavo");
+        organizer.setEmail("gus@example.com");
+        organizer.setPasswordHash("hashed-password");
+        return new OrganizerPrincipal(organizer);
+    }
+
+    private UsernamePasswordAuthenticationToken authenticationToken(OrganizerPrincipal organizer) {
+        return new UsernamePasswordAuthenticationToken(
+                organizer,
+                null,
+                organizer.getAuthorities());
     }
 }

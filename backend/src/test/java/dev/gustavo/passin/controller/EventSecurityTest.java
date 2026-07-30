@@ -5,6 +5,7 @@ import dev.gustavo.passin.controller.dto.event.EventResponseItemDTO;
 import dev.gustavo.passin.config.SecurityConfig;
 import dev.gustavo.passin.repository.OrganizerRepository;
 import dev.gustavo.passin.security.ApiAuthenticationEntryPoint;
+import dev.gustavo.passin.security.JwtAuthenticationFilter;
 import dev.gustavo.passin.service.auth.AccessTokenService;
 import dev.gustavo.passin.service.AttendeeService;
 import dev.gustavo.passin.service.EventService;
@@ -24,7 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(EventController.class)
-@Import({SecurityConfig.class, ApiAuthenticationEntryPoint.class})
+@Import({SecurityConfig.class, ApiAuthenticationEntryPoint.class, JwtAuthenticationFilter.class})
 @ImportAutoConfiguration({SecurityAutoConfiguration.class, ServletWebSecurityAutoConfiguration.class})
 class EventSecurityTest {
 
@@ -66,4 +67,5 @@ class EventSecurityTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.event.id").value("event-1"));
     }
+
 }

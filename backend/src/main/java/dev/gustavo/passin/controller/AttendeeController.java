@@ -15,7 +15,10 @@ public class AttendeeController {
     private final AttendeeService service;
 
     @GetMapping("/{attendeeId}/badge")
-    public ResponseEntity<AttendeeBadgeResponseDTO> getBadge(@PathVariable String attendeeId, UriComponentsBuilder uriComponentsBuilder) {
+    public ResponseEntity<AttendeeBadgeResponseDTO> getBadge(
+            @PathVariable String attendeeId,
+            UriComponentsBuilder uriComponentsBuilder
+    ) {
         AttendeeBadgeResponseDTO response = service.getAttendeeBadge(attendeeId, uriComponentsBuilder);
         return ResponseEntity.ok(response);
     }

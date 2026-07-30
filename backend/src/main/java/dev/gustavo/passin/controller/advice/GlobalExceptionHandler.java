@@ -25,52 +25,82 @@ import java.util.List;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(EventNotFoundException.class)
-    public ResponseEntity<ApiErrorResponseDTO> handleEventNotFound(EventNotFoundException exception, HttpServletRequest request) {
+    public ResponseEntity<ApiErrorResponseDTO> handleEventNotFound(
+            EventNotFoundException exception,
+            HttpServletRequest request
+    ) {
         return buildError(HttpStatus.NOT_FOUND, exception.getMessage(), request);
     }
 
     @ExceptionHandler(AttendeeNotFoundException.class)
-    public ResponseEntity<ApiErrorResponseDTO> handleAttendeeNotFound(AttendeeNotFoundException exception, HttpServletRequest request) {
+    public ResponseEntity<ApiErrorResponseDTO> handleAttendeeNotFound(
+            AttendeeNotFoundException exception,
+            HttpServletRequest request
+    ) {
         return buildError(HttpStatus.NOT_FOUND, exception.getMessage(), request);
     }
 
     @ExceptionHandler(AttendeeAlreadyExistsException.class)
-    public ResponseEntity<ApiErrorResponseDTO> handleAttendeeAlreadyExists(AttendeeAlreadyExistsException exception, HttpServletRequest request) {
+    public ResponseEntity<ApiErrorResponseDTO> handleAttendeeAlreadyExists(
+            AttendeeAlreadyExistsException exception,
+            HttpServletRequest request
+    ) {
         return buildError(HttpStatus.CONFLICT, exception.getMessage(), request);
     }
 
     @ExceptionHandler(AttendeeAlreadyCheckedInException.class)
-    public ResponseEntity<ApiErrorResponseDTO> handleAttendeeAlreadyCheckedIn(AttendeeAlreadyCheckedInException exception, HttpServletRequest request) {
+    public ResponseEntity<ApiErrorResponseDTO> handleAttendeeAlreadyCheckedIn(
+            AttendeeAlreadyCheckedInException exception,
+            HttpServletRequest request
+    ) {
         return buildError(HttpStatus.CONFLICT, exception.getMessage(), request);
     }
 
     @ExceptionHandler(EventIsFullException.class)
-    public ResponseEntity<ApiErrorResponseDTO> handleEventIsFull(EventIsFullException exception, HttpServletRequest request) {
+    public ResponseEntity<ApiErrorResponseDTO> handleEventIsFull(
+            EventIsFullException exception,
+            HttpServletRequest request
+    ) {
         return buildError(HttpStatus.CONFLICT, exception.getMessage(), request);
     }
 
     @ExceptionHandler(InvalidCheckInTokenException.class)
-    public ResponseEntity<ApiErrorResponseDTO> handleInvalidCheckInToken(InvalidCheckInTokenException exception, HttpServletRequest request) {
+    public ResponseEntity<ApiErrorResponseDTO> handleInvalidCheckInToken(
+            InvalidCheckInTokenException exception,
+            HttpServletRequest request
+    ) {
         return buildError(HttpStatus.BAD_REQUEST, exception.getMessage(), request);
     }
 
     @ExceptionHandler(InvalidRefreshTokenException.class)
-    public ResponseEntity<ApiErrorResponseDTO> handleInvalidRefreshToken(InvalidRefreshTokenException exception, HttpServletRequest request) {
+    public ResponseEntity<ApiErrorResponseDTO> handleInvalidRefreshToken(
+            InvalidRefreshTokenException exception,
+            HttpServletRequest request
+    ) {
         return buildError(HttpStatus.UNAUTHORIZED, exception.getMessage(), request);
     }
 
     @ExceptionHandler(OrganizerAlreadyExistsException.class)
-    public ResponseEntity<ApiErrorResponseDTO> handleOrganizerAlreadyExists(OrganizerAlreadyExistsException exception, HttpServletRequest request) {
+    public ResponseEntity<ApiErrorResponseDTO> handleOrganizerAlreadyExists(
+            OrganizerAlreadyExistsException exception,
+            HttpServletRequest request
+    ) {
         return buildError(HttpStatus.CONFLICT, exception.getMessage(), request);
     }
 
     @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<ApiErrorResponseDTO> handleBadCredentials(BadCredentialsException exception, HttpServletRequest request) {
+    public ResponseEntity<ApiErrorResponseDTO> handleBadCredentials(
+            BadCredentialsException exception,
+            HttpServletRequest request
+    ) {
         return buildError(HttpStatus.UNAUTHORIZED, "Invalid credentials", request);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiErrorResponseDTO> handleValidation(MethodArgumentNotValidException exception, HttpServletRequest request) {
+    public ResponseEntity<ApiErrorResponseDTO> handleValidation(
+            MethodArgumentNotValidException exception,
+            HttpServletRequest request
+    ) {
         List<FieldErrorDTO> fields = exception.getBindingResult()
                 .getFieldErrors()
                 .stream()
@@ -89,11 +119,18 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ApiErrorResponseDTO> handleMalformedJson(HttpMessageNotReadableException exception, HttpServletRequest request) {
+    public ResponseEntity<ApiErrorResponseDTO> handleMalformedJson(
+            HttpMessageNotReadableException exception,
+            HttpServletRequest request
+    ) {
         return buildError(HttpStatus.BAD_REQUEST, "Malformed request body", request);
     }
 
-    private ResponseEntity<ApiErrorResponseDTO> buildError(HttpStatus status, String message, HttpServletRequest request) {
+    private ResponseEntity<ApiErrorResponseDTO> buildError(
+            HttpStatus status,
+            String message,
+            HttpServletRequest request
+    ) {
         ApiErrorResponseDTO response = new ApiErrorResponseDTO(
                 Instant.now(),
                 status.value(),
