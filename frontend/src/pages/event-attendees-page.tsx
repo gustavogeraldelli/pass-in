@@ -1,8 +1,9 @@
-import { ArrowLeft, CheckCircle2, Ticket, UserCheck, Users } from 'lucide-react'
+import { ArrowLeft, Check, CheckCircle2, Copy, ExternalLink, Ticket, UserCheck, Users } from 'lucide-react'
 import { ReactNode, useEffect, useState } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import { AttendeeList } from '../components/attendee-list'
 import { Alert } from '../components/alert'
+import { Button } from '../components/button'
 import { EmptyState } from '../components/empty-state'
 import { Event, getEvent } from '../lib/api'
 import { getFriendlyErrorMessage } from '../lib/errors'
@@ -14,6 +15,7 @@ export function EventAttendeesPage() {
     const [event, setEvent] = useState<Event | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
+    const [isPublicLinkCopied, setIsPublicLinkCopied] = useState(false)
 
     useEffect(() => {
         if (!eventId)
@@ -40,6 +42,14 @@ export function EventAttendeesPage() {
         ? Math.min(Math.round((event.numberOfCheckIns / event.numberOfAttendees) * 100), 100)
         : 0
     const isEventFull = event ? remainingSeats === 0 : false
+    const publicEventUrl = event ? `${window.location.origin}/events/${event.id}` : ''
+
+    function handleCopyPublicLink() {
+        navigator.clipboard.writeText(publicEventUrl).then(() => {
+            setIsPublicLinkCopied(true)
+            window.setTimeout(() => setIsPublicLinkCopied(false), 2000)
+        })
+    }
 
     return (
         <main className="flex flex-col gap-5">
@@ -75,12 +85,20 @@ export function EventAttendeesPage() {
                                 <p className="text-sm text-zinc-400">{event.details}</p>
                             </div>
 
-                            <Link
-                                to={`/events/${event.id}`}
-                                className="inline-flex items-center justify-center rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-zinc-200 hover:bg-white/10"
-                            >
-                                Pagina publica
-                            </Link>
+                            <div className="flex flex-col gap-2 sm:flex-row">
+                                <Button type="button" variant="secondary" onClick={handleCopyPublicLink}>
+                                    {isPublicLinkCopied ? <Check className="size-4" /> : <Copy className="size-4" />}
+                                    {isPublicLinkCopied ? 'Copiado' : 'Copiar link'}
+                                </Button>
+
+                                <Link
+                                    to={`/events/${event.id}`}
+                                    className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-zinc-200 hover:bg-white/10"
+                                >
+                                    <ExternalLink className="size-4" />
+                                    Pagina publica
+                                </Link>
+                            </div>
                         </div>
 
                         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
