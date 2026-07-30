@@ -1,4 +1,4 @@
-import { CalendarDays, ChevronRight, Loader2, Plus, Users } from 'lucide-react'
+import { CalendarDays, CheckCircle2, ChevronRight, Loader2, Plus, Ticket, Users } from 'lucide-react'
 import { FormEvent, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Alert } from '../components/alert'
@@ -106,18 +106,28 @@ export function EventsPage() {
 
             <div className="grid gap-3">
                 {events.map((event) => {
-                    const remainingSeats = event.maximumAttendees - event.numberOfAttendees
+                    const remainingSeats = Math.max(event.maximumAttendees - event.numberOfAttendees, 0)
+                    const occupancyRate = Math.min(Math.round((event.numberOfAttendees / event.maximumAttendees) * 100), 100)
+                    const checkInRate = event.numberOfAttendees > 0
+                        ? Math.min(Math.round((event.numberOfCheckIns / event.numberOfAttendees) * 100), 100)
+                        : 0
+                    const isEventFull = remainingSeats === 0
 
                     return (
                         <Link
                             key={event.id}
                             to={`/events/${event.id}`}
-                            className="border border-white/10 rounded-lg p-4 flex items-center justify-between gap-4 bg-white/[0.02] hover:bg-white/[0.04]"
+                            className="border border-white/10 rounded-lg p-4 grid gap-4 bg-white/[0.02] hover:bg-white/[0.04] lg:grid-cols-[1fr_auto]"
                         >
                             <div className="min-w-0 flex flex-col gap-2">
                                 <div className="flex items-center gap-2 text-sm text-emerald-300">
                                     <CalendarDays className="size-4" />
                                     <span>{event.slug}</span>
+                                    {isEventFull && (
+                                        <span className="rounded-md border border-amber-400/20 bg-amber-400/10 px-2 py-0.5 text-xs text-amber-100">
+                                            Lotado
+                                        </span>
+                                    )}
                                 </div>
                                 <div>
                                     <h2 className="font-semibold text-white">{event.title}</h2>
@@ -125,12 +135,32 @@ export function EventsPage() {
                                 </div>
                             </div>
 
-                            <div className="flex items-center gap-6 text-sm text-zinc-300">
-                                <div className="hidden sm:flex items-center gap-2">
-                                    <Users className="size-4 text-emerald-300" />
-                                    <span>{event.numberOfAttendees}/{event.maximumAttendees}</span>
+                            <div className="flex items-center justify-between gap-4 text-sm text-zinc-300 lg:justify-end">
+                                <div className="flex items-center gap-5">
+                                    <div className="flex items-center gap-2">
+                                        <Users className="size-4 text-emerald-300" />
+                                        <span>{event.numberOfAttendees}/{event.maximumAttendees}</span>
+                                    </div>
+                                    <div className="hidden sm:flex items-center gap-2">
+                                        <CheckCircle2 className="size-4 text-emerald-300" />
+                                        <span>{checkInRate}% check-in</span>
+                                    </div>
                                 </div>
-                                <span className="hidden md:inline text-zinc-500">{remainingSeats} vagas restantes</span>
+
+                                <div className="hidden md:flex min-w-40 flex-col gap-1">
+                                    <div className="flex items-center justify-between text-xs text-zinc-500">
+                                        <span>{occupancyRate}% ocupado</span>
+                                        <span>{remainingSeats} livres</span>
+                                    </div>
+                                    <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
+                                        <div className="h-full rounded-full bg-emerald-400" style={{ width: `${occupancyRate}%` }} />
+                                    </div>
+                                </div>
+
+                                <div className="hidden sm:flex items-center gap-2">
+                                    <Ticket className="size-4 text-emerald-300" />
+                                    <span>{remainingSeats}</span>
+                                </div>
                                 <ChevronRight className="size-5 text-zinc-500" />
                             </div>
                         </Link>
