@@ -2,9 +2,11 @@ package dev.gustavo.passin.controller;
 
 import dev.gustavo.passin.controller.dto.auth.AuthResponseDTO;
 import dev.gustavo.passin.exception.OrganizerAlreadyExistsException;
+import dev.gustavo.passin.exception.InvalidRefreshTokenException;
 import dev.gustavo.passin.repository.OrganizerRepository;
-import dev.gustavo.passin.security.JwtService;
-import dev.gustavo.passin.service.AuthService;
+import dev.gustavo.passin.service.auth.AccessTokenService;
+import dev.gustavo.passin.service.auth.AuthenticationService;
+import dev.gustavo.passin.service.auth.AuthenticationTokens;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -29,17 +31,17 @@ class AuthControllerTest {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private AuthService authService;
+    private AuthenticationService authenticationService;
 
     @MockitoBean
     private OrganizerRepository organizerRepository;
 
     @MockitoBean
-    private JwtService jwtService;
+    private AccessTokenService accessTokenService;
 
     @Test
     void shouldRegisterOrganizer() throws Exception {
-        when(authService.register(any())).thenReturn(new AuthResponseDTO("access-token", "Bearer", 900L));
+        when(authenticationService.register(any())).thenReturn(new AuthenticationTokens("access-token", "refresh-token", "Bearer", 900L));
 
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -52,6 +54,7 @@ class AuthControllerTest {
                                 """))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.accessToken").value("access-token"))
+                .andExpect(jsonPath("$.refreshToken").value("refresh-token"))
                 .andExpect(jsonPath("$.tokenType").value("Bearer"))
                 .andExpect(jsonPath("$.expiresInSeconds").value(900));
     }
@@ -76,7 +79,7 @@ class AuthControllerTest {
 
     @Test
     void shouldReturnConflictWhenRegisteringExistingOrganizer() throws Exception {
-        when(authService.register(any()))
+        when(authenticationService.register(any()))
                 .thenThrow(new OrganizerAlreadyExistsException("Organizer email is already registered"));
 
         mockMvc.perform(post("/auth/register")
@@ -94,7 +97,7 @@ class AuthControllerTest {
 
     @Test
     void shouldLoginOrganizer() throws Exception {
-        when(authService.login(any())).thenReturn(new AuthResponseDTO("access-token", "Bearer", 900L));
+        when(authenticationService.login(any())).thenReturn(new AuthenticationTokens("access-token", "refresh-token", "Bearer", 900L));
 
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -106,13 +109,14 @@ class AuthControllerTest {
                                 """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.accessToken").value("access-token"))
+                .andExpect(jsonPath("$.refreshToken").value("refresh-token"))
                 .andExpect(jsonPath("$.tokenType").value("Bearer"))
                 .andExpect(jsonPath("$.expiresInSeconds").value(900));
     }
 
     @Test
     void shouldReturnUnauthorizedWhenCredentialsAreInvalid() throws Exception {
-        when(authService.login(any())).thenThrow(new BadCredentialsException("Invalid credentials"));
+        when(authenticationService.login(any())).thenThrow(new BadCredentialsException("Invalid credentials"));
 
         mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -124,5 +128,52 @@ class AuthControllerTest {
                                 """))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message").value("Invalid credentials"));
+    }
+
+    @Test
+    void shouldRefreshTokens() throws Exception {
+        when(authenticationService.refresh("refresh-token"))
+                .thenReturn(new AuthenticationTokens("new-access-token", "new-refresh-token", "Bearer", 900L));
+
+        mockMvc.perform(post("/auth/refresh")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "refreshToken": "refresh-token"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.accessToken").value("new-access-token"))
+                .andExpect(jsonPath("$.refreshToken").value("new-refresh-token"))
+                .andExpect(jsonPath("$.tokenType").value("Bearer"))
+                .andExpect(jsonPath("$.expiresInSeconds").value(900));
+    }
+
+    @Test
+    void shouldReturnUnauthorizedWhenRefreshTokenIsInvalid() throws Exception {
+        when(authenticationService.refresh("invalid-refresh-token"))
+                .thenThrow(new InvalidRefreshTokenException("Invalid refresh token"));
+
+        mockMvc.perform(post("/auth/refresh")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "refreshToken": "invalid-refresh-token"
+                                }
+                                """))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value("Invalid refresh token"));
+    }
+
+    @Test
+    void shouldLogout() throws Exception {
+        mockMvc.perform(post("/auth/logout")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "refreshToken": "refresh-token"
+                                }
+                                """))
+                .andExpect(status().isNoContent());
     }
 }

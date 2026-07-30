@@ -1,6 +1,7 @@
-package dev.gustavo.passin.security;
+package dev.gustavo.passin.service.auth;
 
 import dev.gustavo.passin.entity.Organizer;
+import dev.gustavo.passin.security.OrganizerPrincipal;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.authentication.BadCredentialsException;
 
@@ -12,26 +13,26 @@ import java.time.ZoneOffset;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class JwtServiceTest {
+class AccessTokenServiceTest {
 
     private final Clock clock = Clock.fixed(Instant.parse("2026-07-30T12:00:00Z"), ZoneOffset.UTC);
-    private final JwtService jwtService = new JwtService(
+    private final AccessTokenService accessTokenService = new AccessTokenService(
             clock,
             "test-secret",
             Duration.ofMinutes(15));
 
     @Test
     void shouldGenerateAndValidateAccessToken() {
-        String token = jwtService.generateAccessToken(new OrganizerPrincipal(organizer()));
+        String token = accessTokenService.generate(new OrganizerPrincipal(organizer()));
 
-        String subject = jwtService.getSubject(token);
+        String subject = accessTokenService.getSubject(token);
 
         assertThat(subject).isEqualTo("organizer-1");
     }
 
     @Test
     void shouldRejectMalformedToken() {
-        assertThatThrownBy(() -> jwtService.getSubject("invalid-token"))
+        assertThatThrownBy(() -> accessTokenService.getSubject("invalid-token"))
                 .isInstanceOf(BadCredentialsException.class)
                 .hasMessage("Invalid access token");
     }

@@ -1,8 +1,9 @@
-package dev.gustavo.passin.security;
+package dev.gustavo.passin.service.auth;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.gustavo.passin.security.OrganizerPrincipal;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Service
-public class JwtService {
+public class AccessTokenService {
 
     private static final String HMAC_SHA256 = "HmacSHA256";
     private static final Base64.Encoder BASE64_URL_ENCODER = Base64.getUrlEncoder().withoutPadding();
@@ -30,16 +31,16 @@ public class JwtService {
     private final byte[] secret;
     private final Duration accessTokenTtl;
 
-    public JwtService(Clock clock,
-                      @Value("${app.auth.jwt-secret}") String secret,
-                      @Value("${app.auth.access-token-ttl}") Duration accessTokenTtl) {
+    public AccessTokenService(Clock clock,
+                              @Value("${app.auth.jwt-secret}") String secret,
+                              @Value("${app.auth.access-token-ttl}") Duration accessTokenTtl) {
         this.objectMapper = new ObjectMapper();
         this.clock = clock;
         this.secret = secret.getBytes(StandardCharsets.UTF_8);
         this.accessTokenTtl = accessTokenTtl;
     }
 
-    public String generateAccessToken(OrganizerPrincipal organizer) {
+    public String generate(OrganizerPrincipal organizer) {
         Instant now = Instant.now(clock);
         Map<String, Object> header = new LinkedHashMap<>();
         header.put("alg", "HS256");

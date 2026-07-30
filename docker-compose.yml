@@ -27,6 +27,7 @@ services:
       FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-http://localhost:9090}
       CHECK_IN_TOKEN_SECRET: ${CHECK_IN_TOKEN_SECRET:-pass-in-dev-secret}
       CHECK_IN_TOKEN_TTL: ${CHECK_IN_TOKEN_TTL:-PT24H}
+      REFRESH_TOKEN_TTL: ${REFRESH_TOKEN_TTL:-P7D}
     ports:
       - "8080:8080"
     depends_on:

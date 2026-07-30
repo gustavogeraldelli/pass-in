@@ -1,6 +1,7 @@
 package dev.gustavo.passin.security;
 
 import dev.gustavo.passin.repository.OrganizerRepository;
+import dev.gustavo.passin.service.auth.AccessTokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,7 +21,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final String BEARER_PREFIX = "Bearer ";
 
-    private final JwtService jwtService;
+    private final AccessTokenService accessTokenService;
     private final OrganizerRepository organizerRepository;
 
     @Override
@@ -36,7 +37,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             String token = authorization.substring(BEARER_PREFIX.length());
-            String organizerId = jwtService.getSubject(token);
+            String organizerId = accessTokenService.getSubject(token);
             organizerRepository.findById(organizerId)
                     .map(OrganizerPrincipal::new)
                     .ifPresent(principal -> {

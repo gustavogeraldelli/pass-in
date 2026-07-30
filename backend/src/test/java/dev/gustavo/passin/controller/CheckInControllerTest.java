@@ -3,7 +3,7 @@ package dev.gustavo.passin.controller;
 import dev.gustavo.passin.exception.AttendeeAlreadyCheckedInException;
 import dev.gustavo.passin.exception.InvalidCheckInTokenException;
 import dev.gustavo.passin.repository.OrganizerRepository;
-import dev.gustavo.passin.security.JwtService;
+import dev.gustavo.passin.service.auth.AccessTokenService;
 import dev.gustavo.passin.service.AttendeeService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +32,7 @@ class CheckInControllerTest {
     private OrganizerRepository organizerRepository;
 
     @MockitoBean
-    private JwtService jwtService;
+    private AccessTokenService accessTokenService;
 
     @Test
     void shouldCheckInByToken() throws Exception {

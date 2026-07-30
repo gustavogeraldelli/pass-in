@@ -124,6 +124,7 @@ FRONTEND_ORIGIN=http://localhost:9090
 VITE_API_BASE_URL=http://localhost:8080
 CHECK_IN_TOKEN_SECRET=change-me
 CHECK_IN_TOKEN_TTL=PT24H
+REFRESH_TOKEN_TTL=P7D
 ```
 
 Frontend-only `.env.example`:

@@ -1,6 +1,6 @@
-package dev.gustavo.passin.controller.dto.auth;
+package dev.gustavo.passin.service.auth;
 
-public record AuthResponseDTO(
+public record AuthenticationTokens(
         String accessToken,
         String refreshToken,
         String tokenType,

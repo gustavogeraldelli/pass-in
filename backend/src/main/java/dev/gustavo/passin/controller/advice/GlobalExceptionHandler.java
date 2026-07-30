@@ -6,6 +6,7 @@ import dev.gustavo.passin.exception.AttendeeAlreadyCheckedInException;
 import dev.gustavo.passin.exception.EventIsFullException;
 import dev.gustavo.passin.exception.EventNotFoundException;
 import dev.gustavo.passin.exception.InvalidCheckInTokenException;
+import dev.gustavo.passin.exception.InvalidRefreshTokenException;
 import dev.gustavo.passin.exception.OrganizerAlreadyExistsException;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -51,6 +52,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidCheckInTokenException.class)
     public ResponseEntity<ApiErrorResponseDTO> handleInvalidCheckInToken(InvalidCheckInTokenException exception, HttpServletRequest request) {
         return buildError(HttpStatus.BAD_REQUEST, exception.getMessage(), request);
+    }
+
+    @ExceptionHandler(InvalidRefreshTokenException.class)
+    public ResponseEntity<ApiErrorResponseDTO> handleInvalidRefreshToken(InvalidRefreshTokenException exception, HttpServletRequest request) {
+        return buildError(HttpStatus.UNAUTHORIZED, exception.getMessage(), request);
     }
 
     @ExceptionHandler(OrganizerAlreadyExistsException.class)

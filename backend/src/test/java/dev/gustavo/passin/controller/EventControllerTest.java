@@ -7,7 +7,7 @@ import dev.gustavo.passin.controller.dto.event.EventResponseItemDTO;
 import dev.gustavo.passin.exception.AttendeeAlreadyExistsException;
 import dev.gustavo.passin.exception.EventNotFoundException;
 import dev.gustavo.passin.repository.OrganizerRepository;
-import dev.gustavo.passin.security.JwtService;
+import dev.gustavo.passin.service.auth.AccessTokenService;
 import dev.gustavo.passin.service.AttendeeService;
 import dev.gustavo.passin.service.EventService;
 import org.junit.jupiter.api.Test;
@@ -51,7 +51,7 @@ class EventControllerTest {
     private OrganizerRepository organizerRepository;
 
     @MockitoBean
-    private JwtService jwtService;
+    private AccessTokenService accessTokenService;
 
     @Test
     void shouldReturnEvents() throws Exception {
