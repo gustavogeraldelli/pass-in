@@ -5,11 +5,13 @@ import { Alert } from '../components/alert'
 import { Button } from '../components/button'
 import { EmptyState } from '../components/empty-state'
 import { Input } from '../components/input'
-import { createEvent, Event, getEvents } from '../lib/api'
+import { createEvent, Event, getOrganizerEvents } from '../lib/api'
 import { getFriendlyErrorMessage } from '../lib/errors'
+import { useAuth } from '../lib/use-auth'
 
 export function EventsPage() {
     const navigate = useNavigate()
+    const { accessToken } = useAuth()
     const [events, setEvents] = useState<Event[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
@@ -20,26 +22,35 @@ export function EventsPage() {
     const [isCreating, setIsCreating] = useState(false)
 
     useEffect(() => {
-        getEvents()
+        if (!accessToken)
+            return
+
+        getOrganizerEvents(accessToken)
             .then((data) => {
                 setEvents(data.events)
                 setError(null)
             })
             .catch((error: Error) => setError(getFriendlyErrorMessage(error, 'Nao foi possivel carregar os eventos.')))
             .finally(() => setIsLoading(false))
-    }, [])
+    }, [accessToken])
 
     function handleCreateEvent(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
         setIsCreating(true)
         setCreationError(null)
 
+        if (!accessToken) {
+            setCreationError('Sessao expirada. Entre novamente.')
+            setIsCreating(false)
+            return
+        }
+
         createEvent({
             title,
             details,
             maximumAttendees: Number(maximumAttendees),
-        })
-            .then((eventId) => navigate(`/events/${eventId}`))
+        }, accessToken)
+            .then((eventId) => navigate(`/events/${eventId}/attendees`))
             .catch((error: Error) => setCreationError(getFriendlyErrorMessage(error, 'Nao foi possivel criar o evento.')))
             .finally(() => setIsCreating(false))
     }
@@ -116,7 +127,7 @@ export function EventsPage() {
                     return (
                         <Link
                             key={event.id}
-                            to={`/events/${event.id}`}
+                            to={`/events/${event.id}/attendees`}
                             className="border border-white/10 rounded-lg p-4 grid gap-4 bg-white/[0.02] hover:bg-white/[0.04] lg:grid-cols-[1fr_auto]"
                         >
                             <div className="min-w-0 flex flex-col gap-2">

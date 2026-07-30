@@ -1,19 +1,23 @@
-import { ArrowLeft, CheckCircle2, Ticket, UserCheck, Users } from 'lucide-react'
-import { ReactNode, useEffect, useState } from 'react'
-import { Link, Navigate, useParams } from 'react-router-dom'
-import { AttendeeList } from '../components/attendee-list'
+import { CheckCircle2, Gauge, Loader2, Ticket, UserCheck, UserPlus, Users } from 'lucide-react'
+import { FormEvent, ReactNode, useEffect, useState } from 'react'
+import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { Alert } from '../components/alert'
+import { Button } from '../components/button'
 import { EmptyState } from '../components/empty-state'
-import { Event, getEvent } from '../lib/api'
+import { Input } from '../components/input'
+import { Event, getEvent, registerAttendee } from '../lib/api'
 import { getFriendlyErrorMessage } from '../lib/errors'
-import { useAuth } from '../lib/use-auth'
 
-export function EventAttendeesPage() {
+export function EventPage() {
     const { eventId } = useParams()
-    const { accessToken } = useAuth()
+    const navigate = useNavigate()
     const [event, setEvent] = useState<Event | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
+    const [name, setName] = useState('')
+    const [email, setEmail] = useState('')
+    const [registrationError, setRegistrationError] = useState<string | null>(null)
+    const [isRegistering, setIsRegistering] = useState(false)
 
     useEffect(() => {
         if (!eventId)
@@ -31,8 +35,16 @@ export function EventAttendeesPage() {
     if (!eventId)
         return <Navigate to="/events" replace />
 
-    if (!accessToken)
-        return <Navigate to="/login" replace />
+    function handleSubmit(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault()
+        setIsRegistering(true)
+        setRegistrationError(null)
+
+        registerAttendee(eventId!, { name, email })
+            .then((attendeeId) => navigate(`/attendees/${attendeeId}/badge`))
+            .catch((error: Error) => setRegistrationError(getFriendlyErrorMessage(error, 'Nao foi possivel realizar a inscricao.')))
+            .finally(() => setIsRegistering(false))
+    }
 
     const remainingSeats = event ? Math.max(event.maximumAttendees - event.numberOfAttendees, 0) : 0
     const occupancyRate = event ? Math.min(Math.round((event.numberOfAttendees / event.maximumAttendees) * 100), 100) : 0
@@ -43,11 +55,6 @@ export function EventAttendeesPage() {
 
     return (
         <main className="flex flex-col gap-5">
-            <Link to="/events" className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-zinc-200">
-                <ArrowLeft className="size-4" />
-                Eventos
-            </Link>
-
             {isLoading && (
                 <EmptyState>
                     Carregando evento...
@@ -61,27 +68,16 @@ export function EventAttendeesPage() {
             )}
 
             {event && (
-                <div className="grid gap-5">
+                <div className="grid gap-5 lg:grid-cols-[1fr_360px]">
                     <section className="flex flex-col gap-4">
-                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                            <div className="flex flex-col gap-2">
-                                <div className="flex items-center gap-3">
-                                    <h1 className="text-2xl font-bold">{event.title}</h1>
-                                    <div className="inline-flex items-center gap-2 text-sm text-zinc-400">
-                                        <Users className="size-4 text-emerald-300" />
-                                        <span>{event.numberOfAttendees}/{event.maximumAttendees}</span>
-                                    </div>
-                                </div>
-                                <p className="text-sm text-zinc-400">{event.details}</p>
+                        <div className="flex items-center gap-3">
+                            <h1 className="text-2xl font-bold">{event.title}</h1>
+                            <div className="inline-flex items-center gap-2 text-sm text-zinc-400">
+                                <Users className="size-4 text-emerald-300" />
+                                <span>{event.numberOfAttendees}/{event.maximumAttendees}</span>
                             </div>
-
-                            <Link
-                                to={`/events/${event.id}`}
-                                className="inline-flex items-center justify-center rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-zinc-200 hover:bg-white/10"
-                            >
-                                Pagina publica
-                            </Link>
                         </div>
+                        <p className="text-sm text-zinc-400">{event.details}</p>
 
                         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                             <MetricCard
@@ -109,16 +105,52 @@ export function EventAttendeesPage() {
                                 tone={isEventFull ? 'warning' : 'default'}
                             />
                         </div>
-
-                        <div className="grid gap-4 border border-white/10 rounded-lg p-4 bg-white/[0.02] md:grid-cols-2">
-                            <ProgressMetric label="Ocupacao" value={occupancyRate} />
-                            <ProgressMetric label="Check-in" value={checkInRate} />
-                        </div>
                     </section>
+
+                    <form onSubmit={handleSubmit} className="border border-white/10 rounded-lg p-4 flex flex-col gap-3 bg-white/[0.02]">
+                        <div className="flex items-center gap-2">
+                            <UserPlus className="size-4 text-emerald-300" />
+                            <h2 className="font-semibold text-white">Nova inscricao</h2>
+                        </div>
+
+                        {isEventFull && (
+                            <span className="inline-flex items-center gap-2 rounded-md border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-sm text-amber-100">
+                                <Gauge className="size-4" />
+                                Evento lotado
+                            </span>
+                        )}
+
+                        <Input
+                            placeholder="Nome"
+                            value={name}
+                            onChange={(event) => setName(event.target.value)}
+                            disabled={isEventFull}
+                            required
+                        />
+
+                        <Input
+                            placeholder="Email"
+                            type="email"
+                            value={email}
+                            onChange={(event) => setEmail(event.target.value)}
+                            disabled={isEventFull}
+                            required
+                        />
+
+                        {registrationError && (
+                            <span className="text-sm text-red-200">{registrationError}</span>
+                        )}
+
+                        <Button
+                            type="submit"
+                            disabled={isRegistering || isEventFull}
+                        >
+                            {isRegistering ? <Loader2 className="size-4 animate-spin" /> : <UserPlus className="size-4" />}
+                            Inscrever
+                        </Button>
+                    </form>
                 </div>
             )}
-
-            <AttendeeList eventId={eventId} accessToken={accessToken} />
         </main>
     )
 }
@@ -140,25 +172,6 @@ function MetricCard({ icon, label, value, detail, tone = 'default' }: MetricCard
             <span className="text-xs uppercase text-zinc-500">{label}</span>
             <p className="text-2xl font-semibold text-white">{value}</p>
             {detail && <span className="text-xs text-zinc-400">{detail}</span>}
-        </div>
-    )
-}
-
-type ProgressMetricProps = {
-    label: string
-    value: number
-}
-
-function ProgressMetric({ label, value }: ProgressMetricProps) {
-    return (
-        <div className="flex flex-col gap-2">
-            <div className="flex items-center justify-between text-sm">
-                <span className="font-medium text-zinc-200">{label}</span>
-                <span className="text-zinc-400">{value}%</span>
-            </div>
-            <div className="h-2 overflow-hidden rounded-full bg-white/10">
-                <div className="h-full rounded-full bg-emerald-400" style={{ width: `${value}%` }} />
-            </div>
         </div>
     )
 }
