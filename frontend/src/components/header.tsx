@@ -31,7 +31,7 @@ export function Header() {
                 {isAuthenticated && (
                     <Button type="button" variant="secondary" onClick={handleLogout}>
                         <LogOut className="size-4" />
-                        Sair
+                        Sign out
                     </Button>
                 )}
             </nav>

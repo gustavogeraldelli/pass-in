@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 
@@ -59,8 +61,8 @@ public class AttendeeService {
             csv.append(csvValue(attendee.getId())).append(",");
             csv.append(csvValue(attendee.getName())).append(",");
             csv.append(csvValue(attendee.getEmail())).append(",");
-            csv.append(csvValue(attendee.getCreatedAt())).append(",");
-            csv.append(csvValue(checkedInAt)).append("\n");
+            csv.append(csvValue(toUtcOffset(attendee.getCreatedAt()))).append(",");
+            csv.append(csvValue(toUtcOffset(checkedInAt))).append("\n");
         }
 
         return csv.toString();
@@ -110,8 +112,15 @@ public class AttendeeService {
                 attendee.getId(),
                 attendee.getName(),
                 attendee.getEmail(),
-                attendee.getCreatedAt(),
-                checkedInAt);
+                toUtcOffset(attendee.getCreatedAt()),
+                toUtcOffset(checkedInAt));
+    }
+
+    private OffsetDateTime toUtcOffset(LocalDateTime dateTime) {
+        if (dateTime == null)
+            return null;
+
+        return dateTime.atOffset(ZoneOffset.UTC);
     }
 
     private String csvValue(Object value) {

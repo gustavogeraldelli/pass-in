@@ -1,11 +1,11 @@
 package dev.gustavo.passin.controller.dto.attendee;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 public record AttendeeResponseItemDTO(
         String id,
         String name,
         String email,
-        LocalDateTime createdAt,
-        LocalDateTime checkInAt) {
+        OffsetDateTime createdAt,
+        OffsetDateTime checkInAt) {
 }

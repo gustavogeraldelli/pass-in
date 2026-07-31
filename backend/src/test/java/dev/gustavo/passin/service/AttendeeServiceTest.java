@@ -17,6 +17,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 
@@ -79,7 +81,8 @@ class AttendeeServiceTest {
         assertThat(response.totalPages()).isEqualTo(1);
         assertThat(response.attendees()).hasSize(1);
         assertThat(response.attendees().getFirst().id()).isEqualTo("attendee-1");
-        assertThat(response.attendees().getFirst().checkInAt()).isEqualTo(checkIn.getCreatedAt());
+        assertThat(response.attendees().getFirst().createdAt()).isEqualTo(OffsetDateTime.of(attendee.getCreatedAt(), ZoneOffset.UTC));
+        assertThat(response.attendees().getFirst().checkInAt()).isEqualTo(OffsetDateTime.of(checkIn.getCreatedAt(), ZoneOffset.UTC));
     }
 
     @Test
@@ -116,7 +119,7 @@ class AttendeeServiceTest {
 
         assertThat(csv).isEqualTo("""
                 id,name,email,registeredAt,checkedInAt
-                "attendee-1","Ana ""Backend"", Silva","ana@example.com","2026-07-28T09:00","2026-07-28T10:00"
+                "attendee-1","Ana ""Backend"", Silva","ana@example.com","2026-07-28T09:00Z","2026-07-28T10:00Z"
                 """);
     }
 
