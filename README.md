@@ -23,7 +23,7 @@ The project was originally based on Rocketseat's NLW event and was expanded with
 - Standardized API errors and DTO validation
 - OpenAPI/Swagger documentation
 - Docker Compose setup for PostgreSQL, backend, and frontend
-- Backend unit/controller tests and GitHub Actions CI
+- Backend unit/controller tests, E2E smoke test, and GitHub Actions CI
 
 ## Stack
 
@@ -120,7 +120,7 @@ POSTGRES_PORT=5432
 DATABASE_URL=jdbc:postgresql://localhost:5432/pass_in
 DATABASE_USERNAME=pass_in
 DATABASE_PASSWORD=pass_in
-FRONTEND_ORIGIN=http://localhost:9090
+FRONTEND_ORIGINS=http://localhost:9090,http://127.0.0.1:9090
 VITE_API_BASE_URL=http://localhost:8080
 CHECK_IN_TOKEN_SECRET=change-me
 CHECK_IN_TOKEN_TTL=PT24H
@@ -185,6 +185,12 @@ Docker:
 
 ```bash
 docker compose build
+```
+
+E2E smoke test with the Docker stack running:
+
+```bash
+node scripts/e2e.mjs
 ```
 
 ## Technical Decisions
