@@ -1,6 +1,6 @@
 import { Loader2, LogIn } from 'lucide-react'
 import { FormEvent, useState } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router'
 import { Alert } from '../components/alert'
 import { Button } from '../components/button'
 import { Input } from '../components/input'

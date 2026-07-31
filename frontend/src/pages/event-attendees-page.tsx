@@ -1,6 +1,6 @@
 import { ArrowLeft, Check, CheckCircle2, Copy, Download, ExternalLink, Ticket, UserCheck, Users } from 'lucide-react'
 import { ReactNode, useEffect, useState } from 'react'
-import { Link, Navigate, useParams } from 'react-router-dom'
+import { Link, Navigate, useParams } from 'react-router'
 import { AttendeeList } from '../components/attendee-list'
 import { Alert } from '../components/alert'
 import { Button } from '../components/button'

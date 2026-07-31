@@ -1,6 +1,6 @@
 import { ArrowLeft, Check, Loader2, QrCode, Ticket, TriangleAlert } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { Link, Navigate, useParams } from 'react-router-dom'
+import { Link, Navigate, useParams } from 'react-router'
 import { QRCodeSVG } from 'qrcode.react'
 import { AttendeeBadge, checkInAttendee, getAttendeeBadge } from '../lib/api'
 import { Alert } from '../components/alert'

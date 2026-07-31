@@ -1,6 +1,6 @@
 import { CheckCircle2, Loader2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { Link, Navigate, useParams } from 'react-router-dom'
+import { Link, Navigate, useParams } from 'react-router'
 import { Alert } from '../components/alert'
 import { EmptyState } from '../components/empty-state'
 import { checkInAttendee } from '../lib/api'

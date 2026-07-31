@@ -1,6 +1,6 @@
 import { CalendarDays, CheckCircle2, ChevronRight, Loader2, Plus, Ticket, Users } from 'lucide-react'
 import { FormEvent, useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router'
 import { Alert } from '../components/alert'
 import { Button } from '../components/button'
 import { EmptyState } from '../components/empty-state'

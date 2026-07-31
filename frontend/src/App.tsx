@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router'
 import { Header } from './components/header'
 import { ProtectedRoute } from './components/protected-route'
 import { AttendeeBadgePage } from './pages/attendee-badge-page'

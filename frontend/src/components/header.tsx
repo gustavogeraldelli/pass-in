@@ -1,5 +1,5 @@
 import { LogOut } from 'lucide-react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router'
 import icon from '../assets/icon.svg'
 import { useAuth } from '../lib/use-auth'
 import { Button } from './button'

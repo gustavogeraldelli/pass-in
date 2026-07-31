@@ -1,6 +1,6 @@
 import { CheckCircle2, Gauge, Loader2, Ticket, UserCheck, UserPlus, Users } from 'lucide-react'
 import { FormEvent, ReactNode, useEffect, useState } from 'react'
-import { Navigate, useNavigate, useParams } from 'react-router-dom'
+import { Navigate, useNavigate, useParams } from 'react-router'
 import { Alert } from '../components/alert'
 import { Button } from '../components/button'
 import { EmptyState } from '../components/empty-state'
