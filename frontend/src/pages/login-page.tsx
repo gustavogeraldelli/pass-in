@@ -31,15 +31,15 @@ export function LoginPage() {
                 saveTokens(tokens)
                 navigate((location.state as LocationState | null)?.from ?? '/events', { replace: true })
             })
-            .catch((error: Error) => setError(getFriendlyErrorMessage(error, 'Nao foi possivel entrar.')))
+            .catch((error: Error) => setError(getFriendlyErrorMessage(error, 'Could not sign in.')))
             .finally(() => setIsSubmitting(false))
     }
 
     return (
         <main className="mx-auto flex w-full max-w-sm flex-col gap-4">
             <div className="flex flex-col gap-1">
-                <h1 className="text-2xl font-bold">Entrar</h1>
-                <span className="text-sm text-zinc-400">Acesse sua area de organizador.</span>
+                <h1 className="text-2xl font-bold">Sign in</h1>
+                <span className="text-sm text-zinc-400">Access your organizer area.</span>
             </div>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-3 rounded-lg border border-white/10 bg-white/[0.02] p-4">
@@ -52,7 +52,7 @@ export function LoginPage() {
                 />
 
                 <Input
-                    placeholder="Senha"
+                    placeholder="Password"
                     type="password"
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
@@ -67,12 +67,12 @@ export function LoginPage() {
 
                 <Button type="submit" disabled={isSubmitting}>
                     {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : <LogIn className="size-4" />}
-                    Entrar
+                    Sign in
                 </Button>
             </form>
 
             <Link to="/register" className="text-sm text-zinc-400 hover:text-zinc-200">
-                Criar uma conta
+                Create an account
             </Link>
         </main>
     )

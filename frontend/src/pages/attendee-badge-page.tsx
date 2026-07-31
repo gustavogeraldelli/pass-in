@@ -28,7 +28,7 @@ export function AttendeeBadgePage() {
                 setBadge(data)
                 setError(null)
             })
-            .catch((error: Error) => setError(getFriendlyErrorMessage(error, 'Nao foi possivel carregar o badge.')))
+            .catch((error: Error) => setError(getFriendlyErrorMessage(error, 'Could not load the badge.')))
             .finally(() => setIsLoading(false))
     }, [attendeeId])
 
@@ -47,11 +47,11 @@ export function AttendeeBadgePage() {
         checkInAttendee(badge.checkInToken)
             .then(() => {
                 setCheckInStatus('success')
-                setCheckInMessage('Check-in realizado.')
+                setCheckInMessage('Check-in completed.')
             })
             .catch((error: Error) => {
                 setCheckInStatus('error')
-                setCheckInMessage(getFriendlyErrorMessage(error, 'Nao foi possivel realizar o check-in.'))
+                setCheckInMessage(getFriendlyErrorMessage(error, 'Could not complete check-in.'))
             })
     }
 
@@ -61,12 +61,12 @@ export function AttendeeBadgePage() {
         <main className="flex flex-col gap-5">
             <Link to="/events" className="inline-flex items-center gap-2 text-sm text-zinc-400 hover:text-zinc-200">
                 <ArrowLeft className="size-4" />
-                Eventos
+                Events
             </Link>
 
             {isLoading && (
                 <EmptyState>
-                    Carregando badge...
+                    Loading badge...
                 </EmptyState>
             )}
 
@@ -81,12 +81,12 @@ export function AttendeeBadgePage() {
                     <section className="border border-white/10 rounded-lg p-5 flex flex-col gap-5 bg-white/[0.02]">
                         <div className="flex items-center gap-3">
                             <Ticket className="size-5 text-emerald-300" />
-                            <h1 className="text-2xl font-bold">Badge do participante</h1>
+                            <h1 className="text-2xl font-bold">Attendee badge</h1>
                         </div>
 
                         <div className="grid gap-4 sm:grid-cols-2">
                             <div>
-                                <span className="text-xs uppercase text-zinc-500">Nome</span>
+                                <span className="text-xs uppercase text-zinc-500">Name</span>
                                 <p className="font-medium text-white">{badge.name}</p>
                             </div>
                             <div>
@@ -94,7 +94,7 @@ export function AttendeeBadgePage() {
                                 <p className="font-medium text-white">{badge.email}</p>
                             </div>
                             <div>
-                                <span className="text-xs uppercase text-zinc-500">Evento</span>
+                                <span className="text-xs uppercase text-zinc-500">Event</span>
                                 <p className="font-mono text-sm text-zinc-300">{badge.eventId}</p>
                             </div>
                         </div>
@@ -106,7 +106,7 @@ export function AttendeeBadgePage() {
                                 disabled={checkInStatus === 'loading' || checkInStatus === 'success'}
                             >
                                 {checkInStatus === 'loading' ? <Loader2 className="size-4 animate-spin" /> : <Check className="size-4" />}
-                                Fazer check-in
+                                Check in
                             </Button>
 
                             {checkInMessage && (
@@ -121,7 +121,7 @@ export function AttendeeBadgePage() {
                     <aside className="border border-white/10 rounded-lg p-5 flex flex-col items-center gap-4 bg-white/[0.02]">
                         <div className="flex items-center gap-2 text-sm text-zinc-400">
                             <QrCode className="size-4 text-emerald-300" />
-                            QR Code de check-in
+                            Check-in QR Code
                         </div>
                         <div className="rounded-lg bg-white p-4">
                             <QRCodeSVG value={qrCodeUrl} size={224} />

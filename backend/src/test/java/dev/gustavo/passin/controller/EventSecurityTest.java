@@ -52,6 +52,13 @@ class EventSecurityTest {
     }
 
     @Test
+    void shouldRejectAttendeeExportWithoutToken() throws Exception {
+        mockMvc.perform(get("/events/event-1/attendees/export"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.message").value("Authentication is required"));
+    }
+
+    @Test
     void shouldAllowPublicEventDetailsWithoutToken() throws Exception {
         EventResponseItemDTO event = new EventResponseItemDTO(
                 "event-1",

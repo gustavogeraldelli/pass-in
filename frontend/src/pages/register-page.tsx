@@ -27,20 +27,20 @@ export function RegisterPage() {
                 saveTokens(tokens)
                 navigate('/events', { replace: true })
             })
-            .catch((error: Error) => setError(getFriendlyErrorMessage(error, 'Nao foi possivel criar sua conta.')))
+            .catch((error: Error) => setError(getFriendlyErrorMessage(error, 'Could not create your account.')))
             .finally(() => setIsSubmitting(false))
     }
 
     return (
         <main className="mx-auto flex w-full max-w-sm flex-col gap-4">
             <div className="flex flex-col gap-1">
-                <h1 className="text-2xl font-bold">Cadastro</h1>
-                <span className="text-sm text-zinc-400">Crie sua conta de organizador.</span>
+                <h1 className="text-2xl font-bold">Create account</h1>
+                <span className="text-sm text-zinc-400">Create your organizer account.</span>
             </div>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-3 rounded-lg border border-white/10 bg-white/[0.02] p-4">
                 <Input
-                    placeholder="Nome"
+                    placeholder="Name"
                     value={name}
                     onChange={(event) => setName(event.target.value)}
                     required
@@ -55,7 +55,7 @@ export function RegisterPage() {
                 />
 
                 <Input
-                    placeholder="Senha"
+                    placeholder="Password"
                     type="password"
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
@@ -70,12 +70,12 @@ export function RegisterPage() {
 
                 <Button type="submit" disabled={isSubmitting}>
                     {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : <UserPlus className="size-4" />}
-                    Criar conta
+                    Create account
                 </Button>
             </form>
 
             <Link to="/login" className="text-sm text-zinc-400 hover:text-zinc-200">
-                Ja tenho conta
+                I already have an account
             </Link>
         </main>
     )

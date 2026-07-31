@@ -4,7 +4,7 @@
 
 Fullstack event check-in platform with React, TypeScript, Spring Boot, PostgreSQL, QR code badges, Docker, OpenAPI, and tests.
 
-The project was originally based on Rocketseat's NLW event and was expanded with organizer authentication, real persistence, backend validation, a navigable frontend flow, QR code check-ins, Docker setup, CI, and business-rule tests.
+The project was originally based on Rocketseat's NLW event and was expanded with organizer authentication, real persistence, backend validation, a navigable frontend experience, QR code check-ins, Docker setup, CI, and business-rule tests.
 
 ## Features
 
@@ -16,7 +16,7 @@ The project was originally based on Rocketseat's NLW event and was expanded with
 - Duplicate registration prevention by event and email
 - Attendee search and backend pagination
 - Attendee badge page with QR code
-- Check-in flow with duplicate check-in prevention
+- Check-in process with duplicate check-in prevention
 - Access tokens and refresh token rotation
 - Automatic session refresh for protected frontend requests
 - Event dashboard with seats, attendees, check-ins, and remaining capacity
@@ -48,10 +48,6 @@ postgres   PostgreSQL database managed by Docker Compose
 ```
 
 The frontend consumes the Spring Boot API through `VITE_API_BASE_URL`. The backend reads database, CORS, check-in token, and auth token configuration from environment variables.
-
-## Interface
-
-![pass.in interface](assets/ui.png)
 
 ## Running With Docker
 
@@ -198,6 +194,6 @@ docker compose build
 - Backend pagination/search avoids loading all attendees into the browser.
 - The frontend uses React Router instead of hardcoded event state.
 - QR code badges use signed check-in tokens.
-- Organizer-owned event management keeps attendee registration and check-in public while protecting the administrative flow.
+- Organizer-owned event management keeps attendee registration and check-in public while protecting the administrative area.
 - Protected frontend requests retry once after refreshing the access token.
 - Backend tests cover authentication, event ownership, event capacity, duplicate registration, badge generation, signed check-in tokens, HTTP status codes, and standardized error responses.

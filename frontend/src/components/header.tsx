@@ -21,9 +21,9 @@ export function Header() {
                     <img src={icon} alt="logo" />
                 </Link>
                 <nav className="flex items-center gap-5">
-                    {isAuthenticated && <NavLink to="/events">Eventos</NavLink>}
-                    {!isAuthenticated && <NavLink to="/login">Entrar</NavLink>}
-                    {!isAuthenticated && <NavLink to="/register">Cadastro</NavLink>}
+                    {isAuthenticated && <NavLink to="/events">Events</NavLink>}
+                    {!isAuthenticated && <NavLink to="/login">Sign in</NavLink>}
+                    {!isAuthenticated && <NavLink to="/register">Create account</NavLink>}
                 </nav>
             </div>
 

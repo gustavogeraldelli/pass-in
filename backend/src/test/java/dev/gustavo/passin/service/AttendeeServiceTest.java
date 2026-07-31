@@ -102,6 +102,25 @@ class AttendeeServiceTest {
     }
 
     @Test
+    void shouldExportAttendeesAsCsv() {
+        Event event = event("event-1");
+        Attendee attendee = attendee("attendee-1", event);
+        attendee.setName("Ana \"Backend\", Silva");
+        CheckIn checkIn = new CheckIn();
+        checkIn.setCreatedAt(LocalDateTime.of(2026, 7, 28, 10, 0));
+
+        when(attendeeRepository.findByEventIdOrderByCreatedAtAsc("event-1")).thenReturn(List.of(attendee));
+        when(checkInService.getCheckIn("attendee-1")).thenReturn(Optional.of(checkIn));
+
+        String csv = attendeeService.exportEventAttendeesCsv("event-1");
+
+        assertThat(csv).isEqualTo("""
+                id,name,email,registeredAt,checkedInAt
+                "attendee-1","Ana ""Backend"", Silva","ana@example.com","2026-07-28T09:00","2026-07-28T10:00"
+                """);
+    }
+
+    @Test
     void shouldReturnAttendeeBadge() {
         Event event = event("event-1");
         Attendee attendee = attendee("attendee-1", event);

@@ -27,7 +27,7 @@ export function EventsPage() {
                 setEvents(data.events)
                 setError(null)
             })
-            .catch((error: Error) => setError(getFriendlyErrorMessage(error, 'Nao foi possivel carregar os eventos.')))
+            .catch((error: Error) => setError(getFriendlyErrorMessage(error, 'Could not load events.')))
             .finally(() => setIsLoading(false))
     }, [authenticatedRequest])
 
@@ -42,33 +42,33 @@ export function EventsPage() {
             maximumAttendees: Number(maximumAttendees),
         }, accessToken))
             .then((eventId) => navigate(`/events/${eventId}/attendees`))
-            .catch((error: Error) => setCreationError(getFriendlyErrorMessage(error, 'Nao foi possivel criar o evento.')))
+            .catch((error: Error) => setCreationError(getFriendlyErrorMessage(error, 'Could not create the event.')))
             .finally(() => setIsCreating(false))
     }
 
     return (
         <main className="flex flex-col gap-4">
             <div className="flex items-center justify-between gap-4">
-                <h1 className="text-2xl font-bold">Eventos</h1>
+                <h1 className="text-2xl font-bold">Events</h1>
             </div>
 
             <form onSubmit={handleCreateEvent} className="border border-white/10 rounded-lg p-4 grid gap-3 bg-white/[0.02] lg:grid-cols-[1fr_1fr_180px_auto]">
                 <Input
-                    placeholder="Titulo do evento"
+                    placeholder="Event title"
                     value={title}
                     onChange={(event) => setTitle(event.target.value)}
                     required
                 />
 
                 <Input
-                    placeholder="Descricao"
+                    placeholder="Description"
                     value={details}
                     onChange={(event) => setDetails(event.target.value)}
                     required
                 />
 
                 <Input
-                    placeholder="Vagas"
+                    placeholder="Seats"
                     type="number"
                     min={1}
                     value={maximumAttendees}
@@ -78,7 +78,7 @@ export function EventsPage() {
 
                 <Button type="submit" disabled={isCreating}>
                     {isCreating ? <Loader2 className="size-4 animate-spin" /> : <Plus className="size-4" />}
-                    Criar
+                    Create
                 </Button>
 
                 {creationError && (
@@ -90,7 +90,7 @@ export function EventsPage() {
 
             {isLoading && (
                 <EmptyState>
-                    Carregando eventos...
+                    Loading events...
                 </EmptyState>
             )}
 
@@ -102,7 +102,7 @@ export function EventsPage() {
 
             {!isLoading && !error && events.length === 0 && (
                 <EmptyState>
-                    Nenhum evento cadastrado. Crie o primeiro evento pelo formulario acima.
+                    No events registered. Create the first event using the form above.
                 </EmptyState>
             )}
 
@@ -127,7 +127,7 @@ export function EventsPage() {
                                     <span>{event.slug}</span>
                                     {isEventFull && (
                                         <span className="rounded-md border border-amber-400/20 bg-amber-400/10 px-2 py-0.5 text-xs text-amber-100">
-                                            Lotado
+                                            Full
                                         </span>
                                     )}
                                 </div>
@@ -151,8 +151,8 @@ export function EventsPage() {
 
                                 <div className="hidden md:flex min-w-40 flex-col gap-1">
                                     <div className="flex items-center justify-between text-xs text-zinc-500">
-                                        <span>{occupancyRate}% ocupado</span>
-                                        <span>{remainingSeats} livres</span>
+                                        <span>{occupancyRate}% occupied</span>
+                                        <span>{remainingSeats} free</span>
                                     </div>
                                     <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
                                         <div className="h-full rounded-full bg-emerald-400" style={{ width: `${occupancyRate}%` }} />

@@ -12,10 +12,14 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import java.nio.charset.StandardCharsets;
 
 @RestController
 @RequestMapping("/events")
@@ -63,6 +67,21 @@ public class EventController {
         Pageable pageable = PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), 100));
         AttendeeListResponseDTO attendees = attendeeService.getEventsAttendee(eventId, query, pageable);
         return ResponseEntity.ok(attendees);
+    }
+
+    @GetMapping("/{eventId}/attendees/export")
+    public ResponseEntity<String> exportEventAttendees(
+            @PathVariable String eventId,
+            Authentication authentication
+    ) {
+        OrganizerPrincipal organizer = (OrganizerPrincipal) authentication.getPrincipal();
+        eventService.getEventByIdAndOrganizer(eventId, organizer.getId());
+        String csv = attendeeService.exportEventAttendeesCsv(eventId);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"event-attendees.csv\"")
+                .contentType(new MediaType("text", "csv", StandardCharsets.UTF_8))
+                .body(csv);
     }
 
     @PostMapping("/{eventId}/attendees")

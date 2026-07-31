@@ -49,6 +49,23 @@ public class AttendeeService {
                 attendeePage.getTotalPages());
     }
 
+    public String exportEventAttendeesCsv(String eventId) {
+        StringBuilder csv = new StringBuilder("id,name,email,registeredAt,checkedInAt\n");
+
+        for (Attendee attendee : attendeeRepository.findByEventIdOrderByCreatedAtAsc(eventId)) {
+            Optional<CheckIn> checkIn = checkInService.getCheckIn(attendee.getId());
+            LocalDateTime checkedInAt = checkIn.map(CheckIn::getCreatedAt).orElse(null);
+
+            csv.append(csvValue(attendee.getId())).append(",");
+            csv.append(csvValue(attendee.getName())).append(",");
+            csv.append(csvValue(attendee.getEmail())).append(",");
+            csv.append(csvValue(attendee.getCreatedAt())).append(",");
+            csv.append(csvValue(checkedInAt)).append("\n");
+        }
+
+        return csv.toString();
+    }
+
     public void verifyAttendeeSubscription(String email, String eventId) {
         Optional<Attendee> attendee = attendeeRepository.findByEventIdAndEmail(eventId, email);
         if (attendee.isPresent())
@@ -95,5 +112,12 @@ public class AttendeeService {
                 attendee.getEmail(),
                 attendee.getCreatedAt(),
                 checkedInAt);
+    }
+
+    private String csvValue(Object value) {
+        if (value == null)
+            return "";
+
+        return "\"" + value.toString().replace("\"", "\"\"") + "\"";
     }
 }

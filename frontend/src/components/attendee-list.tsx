@@ -48,7 +48,7 @@ export function AttendeeList({ eventId, authenticatedRequest }: AttendeeListProp
                 setAttendees([])
                 setTotalElements(0)
                 setTotalPages(0)
-                setError(getFriendlyErrorMessage(error, 'Nao foi possivel carregar os participantes.'))
+                setError(getFriendlyErrorMessage(error, 'Could not load attendees.'))
             })
             .finally(() => setIsLoading(false))
     }, [authenticatedRequest, eventId, page, query])
@@ -96,12 +96,12 @@ export function AttendeeList({ eventId, authenticatedRequest }: AttendeeListProp
     return (
         <div className='flex flex-col gap-4'>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                <h1 className="text-2xl font-bold">Participantes</h1>
+                <h1 className="text-2xl font-bold">Attendees</h1>
                 <div className="w-full px-3 py-1.5 border border-white/10 rounded-lg flex items-center gap-3 sm:w-72">
                     <Search className="size-4 text-emerald-300" />
                     <input
                         className="bg-transparent flex-1 outline-none h-auto border-0 p-0 text-sm focus:ring-0"
-                        placeholder="Buscar participante..."
+                        placeholder="Search attendee..."
                         value={query}
                         onChange={onSearchInputChanged}
                     />
@@ -120,23 +120,23 @@ export function AttendeeList({ eventId, authenticatedRequest }: AttendeeListProp
                         <TableHeader style={{width: 48}}>
                             <input className='size-4 bg-black/20 rounded border border-white/10 ' type="checkbox" name="" id="" />
                         </TableHeader>
-                        <TableHeader>Código</TableHeader>
-                        <TableHeader>Participante</TableHeader>
-                        <TableHeader>Data de inscrição</TableHeader>
-                        <TableHeader>Data do check-in</TableHeader>
+                        <TableHeader>Code</TableHeader>
+                        <TableHeader>Attendee</TableHeader>
+                        <TableHeader>Registered at</TableHeader>
+                        <TableHeader>Checked in at</TableHeader>
                         <TableHeader style={{width: 64}}></TableHeader>
                     </tr>
                 </thead>
                 <tbody>
                     {isLoading && (
                         <TableRow>
-                            <TableCell colSpan={6} className="text-zinc-400">Carregando participantes...</TableCell>
+                            <TableCell colSpan={6} className="text-zinc-400">Loading attendees...</TableCell>
                         </TableRow>
                     )}
 
                     {!isLoading && !error && attendees.length === 0 && (
                         <TableRow>
-                            <TableCell colSpan={6} className="text-zinc-400">Nenhum participante encontrado.</TableCell>
+                            <TableCell colSpan={6} className="text-zinc-400">No attendees found.</TableCell>
                         </TableRow>
                     )}
 
@@ -159,7 +159,7 @@ export function AttendeeList({ eventId, authenticatedRequest }: AttendeeListProp
                                     <Link
                                         to={`/attendees/${attendee.id}/badge`}
                                         className="inline-flex border border-white/10 rounded-md p-1.5 bg-black/20"
-                                        title="Abrir badge"
+                                        title="Open badge"
                                     >
                                         <Ticket className="size-4" />
                                     </Link>
@@ -170,11 +170,11 @@ export function AttendeeList({ eventId, authenticatedRequest }: AttendeeListProp
                 </tbody>
                 <tfoot>
                     <TableCell colSpan={3}>
-                        Mostrando {currentPageSize} de {totalElements}
+                        Showing {currentPageSize} of {totalElements}
                     </TableCell>
                     <TableCell className='text-right' colSpan={3}>
                         <div className='inline-flex items-center gap-8'>
-                            <span className="whitespace-nowrap">Página {totalPages === 0 ? 0 : page + 1} de {totalPages}</span>
+                            <span className="whitespace-nowrap">Page {totalPages === 0 ? 0 : page + 1} of {totalPages}</span>
                             
                             <div className='flex gap-1.5'>
                                 <IconButton onClick={goToFirstPage} disabled={page === 0}>

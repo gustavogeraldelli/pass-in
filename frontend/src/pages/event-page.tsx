@@ -28,7 +28,7 @@ export function EventPage() {
                 setEvent(data.event)
                 setError(null)
             })
-            .catch((error: Error) => setError(getFriendlyErrorMessage(error, 'Nao foi possivel carregar o evento.')))
+            .catch((error: Error) => setError(getFriendlyErrorMessage(error, 'Could not load the event.')))
             .finally(() => setIsLoading(false))
     }, [eventId])
 
@@ -42,7 +42,7 @@ export function EventPage() {
 
         registerAttendee(eventId!, { name, email })
             .then((attendeeId) => navigate(`/attendees/${attendeeId}/badge`))
-            .catch((error: Error) => setRegistrationError(getFriendlyErrorMessage(error, 'Nao foi possivel realizar a inscricao.')))
+            .catch((error: Error) => setRegistrationError(getFriendlyErrorMessage(error, 'Could not register for this event.')))
             .finally(() => setIsRegistering(false))
     }
 
@@ -57,7 +57,7 @@ export function EventPage() {
         <main className="flex flex-col gap-5">
             {isLoading && (
                 <EmptyState>
-                    Carregando evento...
+                    Loading event...
                 </EmptyState>
             )}
 
@@ -82,26 +82,26 @@ export function EventPage() {
                         <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                             <MetricCard
                                 icon={<Ticket className="size-5" />}
-                                label="Total de vagas"
+                                label="Total seats"
                                 value={event.maximumAttendees}
                             />
                             <MetricCard
                                 icon={<Users className="size-5" />}
-                                label="Inscritos"
+                                label="Registered"
                                 value={event.numberOfAttendees}
-                                detail={`${occupancyRate}% ocupado`}
+                                detail={`${occupancyRate}% occupied`}
                             />
                             <MetricCard
                                 icon={<UserCheck className="size-5" />}
                                 label="Check-ins"
                                 value={event.numberOfCheckIns}
-                                detail={`${checkInRate}% dos inscritos`}
+                                detail={`${checkInRate}% of attendees`}
                             />
                             <MetricCard
                                 icon={<CheckCircle2 className="size-5" />}
-                                label="Vagas restantes"
+                                label="Remaining seats"
                                 value={remainingSeats}
-                                detail={isEventFull ? 'Evento lotado' : 'Disponivel'}
+                                detail={isEventFull ? 'Event full' : 'Available'}
                                 tone={isEventFull ? 'warning' : 'default'}
                             />
                         </div>
@@ -110,18 +110,18 @@ export function EventPage() {
                     <form onSubmit={handleSubmit} className="border border-white/10 rounded-lg p-4 flex flex-col gap-3 bg-white/[0.02]">
                         <div className="flex items-center gap-2">
                             <UserPlus className="size-4 text-emerald-300" />
-                            <h2 className="font-semibold text-white">Nova inscricao</h2>
+                            <h2 className="font-semibold text-white">New registration</h2>
                         </div>
 
                         {isEventFull && (
                             <span className="inline-flex items-center gap-2 rounded-md border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-sm text-amber-100">
                                 <Gauge className="size-4" />
-                                Evento lotado
+                                Event full
                             </span>
                         )}
 
                         <Input
-                            placeholder="Nome"
+                            placeholder="Name"
                             value={name}
                             onChange={(event) => setName(event.target.value)}
                             disabled={isEventFull}
@@ -146,7 +146,7 @@ export function EventPage() {
                             disabled={isRegistering || isEventFull}
                         >
                             {isRegistering ? <Loader2 className="size-4 animate-spin" /> : <UserPlus className="size-4" />}
-                            Inscrever
+                            Register
                         </Button>
                     </form>
                 </div>

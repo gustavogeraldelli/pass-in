@@ -42,6 +42,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(EventController.class)
@@ -152,6 +153,22 @@ class EventControllerTest {
         verify(attendeeService).getEventsAttendee(eq("event-1"), eq("ana"), pageableCaptor.capture());
         assertThat(pageableCaptor.getValue().getPageNumber()).isZero();
         assertThat(pageableCaptor.getValue().getPageSize()).isEqualTo(100);
+    }
+
+    @Test
+    void shouldExportEventAttendees() throws Exception {
+        when(attendeeService.exportEventAttendeesCsv("event-1"))
+                .thenReturn("id,name,email,registeredAt,checkedInAt\n\"attendee-1\",\"Ana\",\"ana@example.com\",\"2026-07-28T09:00\",\n");
+
+        mockMvc.perform(get("/events/event-1/attendees/export")
+                        .with(authentication(authenticationToken(organizerPrincipal()))))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Content-Disposition", "attachment; filename=\"event-attendees.csv\""))
+                .andExpect(content().contentType("text/csv;charset=UTF-8"))
+                .andExpect(content().string("id,name,email,registeredAt,checkedInAt\n\"attendee-1\",\"Ana\",\"ana@example.com\",\"2026-07-28T09:00\",\n"));
+
+        verify(eventService).getEventByIdAndOrganizer("event-1", "organizer-1");
+        verify(attendeeService).exportEventAttendeesCsv("event-1");
     }
 
     @Test

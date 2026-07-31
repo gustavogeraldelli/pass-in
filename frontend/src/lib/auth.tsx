@@ -25,7 +25,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const authenticatedRequest = useCallback(async <T,>(request: (accessToken: string) => Promise<T>) => {
         if (!accessToken || !refreshToken)
-            throw new Error('Sessao expirada. Entre novamente.')
+            throw new Error('Session expired. Sign in again.')
 
         try {
             return await request(accessToken)

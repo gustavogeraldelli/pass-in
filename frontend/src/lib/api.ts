@@ -142,6 +142,21 @@ export function getEventAttendees(
     return request<AttendeeListResponse>(`/events/${eventId}/attendees?${searchParams}`, undefined, accessToken)
 }
 
+export async function exportEventAttendees(eventId: string, accessToken: string) {
+    const response = await fetch(`${API_BASE_URL}/events/${eventId}/attendees/export`, {
+        headers: {
+            Authorization: `Bearer ${accessToken}`,
+        },
+    })
+
+    if (!response.ok) {
+        const error = await readError(response)
+        throw new ApiRequestError(response.status, error)
+    }
+
+    return response.blob()
+}
+
 export function registerAttendee(eventId: string, attendee: { name: string, email: string }) {
     return request<string>(`/events/${eventId}/attendees`, {
         method: 'POST',
