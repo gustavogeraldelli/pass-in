@@ -6,6 +6,16 @@ Fullstack event check-in platform with React, TypeScript, Spring Boot, PostgreSQ
 
 The project was originally based on Rocketseat's NLW event and was expanded with organizer authentication, real persistence, backend validation, a navigable frontend experience, QR code check-ins, Docker setup, CI, and business-rule tests.
 
+## Preview
+
+<p align="center">
+  <img src="docs/events-list.png" alt="Organizer events list" width="70%">
+</p>
+
+<p align="center">
+  <img src="docs/event-details.png" alt="Event attendees management" width="70%">
+</p>
+
 ## Features
 
 - Event creation, listing, and details
